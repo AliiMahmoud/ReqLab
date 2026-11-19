@@ -1,0 +1,25 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+  "rangeStrategy": "pin",
+  "minimumReleaseAge": "7 days",
+  "internalChecksFilter": "strict",
+  "schedule": ["before 6am on monday"],
+  "packageRules": [
+    {
+      "description": "Group dev tooling into one weekly PR.",
+      "matchDepTypes": ["devDependencies"],
+      "excludePackageNames": ["electron"],
+      "groupName": "dev tooling"
+    },
+    {
+      "description": "Electron security releases get their own PR so they are never stuck behind tooling.",
+      "matchPackageNames": ["electron"],
+      "groupName": "electron"
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "minimumReleaseAge": null
+  }
+}

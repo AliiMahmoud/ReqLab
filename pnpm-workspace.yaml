@@ -1,0 +1,26 @@
+# pnpm settings for a single-package repo.
+
+# Never install a package version that is less than 7 days old.
+# Hijacked or malicious releases are usually caught and pulled within days.
+minimumReleaseAge: 10080
+
+# No dependency may run install scripts.
+# - Electron 45+ has no install script; our own "postinstall" runs its checksum-verified installer.
+# - better-sqlite3-multiple-ciphers ships prebuilt N-API binaries; its node-gyp fallback must not run.
+onlyBuiltDependencies: []
+ignoredBuiltDependencies:
+  - better-sqlite3-multiple-ciphers
+  - electron-winstaller
+
+# Fail instead of silently accepting a peer dependency mismatch.
+strictPeerDependencies: true
+
+# Security overrides: force patched versions of vulnerable transitive packages.
+# Remove an entry once the parent package ships the fix itself.
+overrides:
+  # GHSA-g3hv-75wg-m249 (CVE-2026-118764), pulled in by electron-builder.
+  "minimatch@>=7.0.0 <11.0.1": "11.0.5"
+
+# Record exact versions (no ^ or ~) and refuse to install on an unsupported Node version.
+saveExact: true
+engineStrict: true

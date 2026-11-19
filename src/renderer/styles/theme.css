@@ -1,0 +1,231 @@
+/*
+ * Design tokens. Components read these; nothing else hard-codes colours.
+ * Dark follows the "Local API Client Mocks" design (amber accent); light is its daylight counterpart.
+ * The theme follows the system unless the user picks one (html[data-theme="light" | "dark"]).
+ * Fonts: IBM Plex Sans / JetBrains Mono when installed; the CSP forbids loading web fonts.
+ */
+:root {
+  color-scheme: light;
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-code: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --color-background: #ffffff;
+  --color-sunken: #f8f9fb;
+  --color-surface: #f4f5f7;
+  --color-raised: #ffffff;
+  --color-field: #ffffff;
+  --color-selected: #e9ecf1;
+  --color-border: #dfe3e9;
+  --color-border-soft: #eceef2;
+  --color-field-border: #cfd5de;
+  --color-checkbox-border: #b5bdc9;
+  --color-hover-tint: rgb(0 0 0 / 3%);
+
+  --color-text: #1b1f26;
+  --color-text-soft: #2a303a;
+  --color-text-strong-muted: #39404d;
+  --color-text-muted: #545c69;
+  --color-text-faint: #677080;
+  --color-gutter: #9aa1ad;
+
+  --color-accent: #f0a030;
+  --color-accent-hover: #f5b555;
+  --color-accent-text: #1a1206;
+  /* Amber text needs a darker shade to stay readable on white. */
+  --color-link: #9a5a00;
+
+  --color-variable: #8a5600;
+  --color-variable-background: #fff1d6;
+  --color-variable-missing: #b3261e;
+  --color-variable-missing-background: #fde7e5;
+
+  --color-success: #17723a;
+  --color-success-background: #e3f3e8;
+  --color-success-border: #b4dcc1;
+  --color-warning: #8a5600;
+  --color-warning-background: #fff1d6;
+  --color-danger: #b3261e;
+  --color-danger-background: #fde7e5;
+  /* Destructive main buttons ("Delete forever"): white with red in light, red with white in dark. */
+  --color-danger-button: #ffffff;
+  --color-danger-button-text: #b3261e;
+  --color-danger-button-border: #b3261e;
+  --color-danger-button-hover: #fde7e5;
+  --color-info: #2a62c9;
+
+  --method-get: #15803d;
+  --method-post: #a15c00;
+  --method-put: #2a62c9;
+  --method-patch: #8a3fb0;
+  --method-delete: #b3261e;
+  --method-other: #545c69;
+
+  --syntax-key: #2a62c9;
+  /* macOS-style folder: a darker back with the tab, a lighter front, a soft top highlight. */
+  --folder-back: #4f9fe6;
+  --folder-front: #7cbef4;
+  --folder-shine: rgb(255 255 255 / 45%);
+  --syntax-string: #17723a;
+  --syntax-literal: #8a3fb0;
+  --syntax-punctuation: #2a303a;
+  --syntax-selection: rgb(240 160 48 / 28%);
+  /* Popups: dropdowns, menus, cards. Each theme can make them softer or deeper. */
+  --shadow-popup: 0 12px 32px rgb(0 0 0 / 16%);
+}
+
+/* Dark: when the system is dark (unless Light was chosen), or when Dark was chosen. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --color-background: #0f1115;
+    --color-sunken: #0d0f13;
+    --color-surface: #13161c;
+    --color-raised: #161a21;
+    --color-field: #1b1f27;
+    --color-selected: #232833;
+    --color-border: #262b35;
+    --color-border-soft: #1e222b;
+    --color-field-border: #2e3440;
+    --color-checkbox-border: #3a4150;
+    --color-hover-tint: rgb(255 255 255 / 3%);
+    --color-text: #e6e8ec;
+    --color-text-soft: #d5d9e0;
+    --color-text-strong-muted: #c9ced8;
+    --color-text-muted: #9aa3b2;
+    --color-text-faint: #8a93a3;
+    --color-gutter: #4f5766;
+    --color-accent-hover: #ffc266;
+    --color-link: #f0a030;
+    --color-variable: #e7b65c;
+    --color-variable-background: #2a2213;
+    --color-variable-missing: #f28b82;
+    --color-variable-missing-background: #3a1d1b;
+    --color-success: #7fd49a;
+    --color-success-background: #12261a;
+    --color-success-border: #1f4a2e;
+    --color-warning: #e7b65c;
+    --color-warning-background: #2a2213;
+    --color-danger: #f28b82;
+    --color-danger-background: #3a1d1b;
+    --color-danger-button: #d93025;
+    --color-danger-button-text: #ffffff;
+    --color-danger-button-border: #d93025;
+    --color-danger-button-hover: #e8473c;
+    --color-info: #8fb8f0;
+    --shadow-popup: 0 12px 32px rgb(0 0 0 / 45%);
+    --method-get: #6fcf97;
+    --method-post: #f0a030;
+    --method-put: #8fb8f0;
+    --method-patch: #d7a6f2;
+    --method-delete: #f28b82;
+    --method-other: #9aa3b2;
+    --syntax-key: #8fb8f0;
+    --folder-back: #3a84cc;
+    --folder-front: #5ca6e8;
+    --folder-shine: rgb(255 255 255 / 22%);
+    --syntax-string: #a9d99b;
+    --syntax-literal: #d7a6f2;
+    --syntax-punctuation: #d5d9e0;
+    --syntax-selection: rgb(240 160 48 / 22%);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-background: #0f1115;
+  --color-sunken: #0d0f13;
+  --color-surface: #13161c;
+  --color-raised: #161a21;
+  --color-field: #1b1f27;
+  --color-selected: #232833;
+  --color-border: #262b35;
+  --color-border-soft: #1e222b;
+  --color-field-border: #2e3440;
+  --color-checkbox-border: #3a4150;
+  --color-hover-tint: rgb(255 255 255 / 3%);
+  --color-text: #e6e8ec;
+  --color-text-soft: #d5d9e0;
+  --color-text-strong-muted: #c9ced8;
+  --color-text-muted: #9aa3b2;
+  --color-text-faint: #8a93a3;
+  --color-gutter: #4f5766;
+  --color-accent-hover: #ffc266;
+  --color-link: #f0a030;
+  --color-variable: #e7b65c;
+  --color-variable-background: #2a2213;
+  --color-variable-missing: #f28b82;
+  --color-variable-missing-background: #3a1d1b;
+  --color-success: #7fd49a;
+  --color-success-background: #12261a;
+  --color-success-border: #1f4a2e;
+  --color-warning: #e7b65c;
+  --color-warning-background: #2a2213;
+  --color-danger: #f28b82;
+  --color-danger-background: #3a1d1b;
+  --color-danger-button: #d93025;
+  --color-danger-button-text: #ffffff;
+  --color-danger-button-border: #d93025;
+  --color-danger-button-hover: #e8473c;
+  --color-info: #8fb8f0;
+  --shadow-popup: 0 12px 32px rgb(0 0 0 / 45%);
+  --method-get: #6fcf97;
+  --method-post: #f0a030;
+  --method-put: #8fb8f0;
+  --method-patch: #d7a6f2;
+  --method-delete: #f28b82;
+  --method-other: #9aa3b2;
+  --syntax-key: #8fb8f0;
+  --folder-back: #3a84cc;
+  --folder-front: #5ca6e8;
+  --folder-shine: rgb(255 255 255 / 22%);
+  --syntax-string: #a9d99b;
+  --syntax-literal: #d7a6f2;
+  --syntax-punctuation: #d5d9e0;
+  --syntax-selection: rgb(240 160 48 / 22%);
+}
+
+:root {
+  --radius-small: 4px;
+  --radius: 6px;
+  --radius-large: 8px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+
+reqlab-app {
+  display: block;
+  height: 100%;
+}
+
+/* The app header doubles as the window's title bar (no native one). */
+:root {
+  /* Must match TITLE_BAR_HEIGHT in main/security/title-bar.ts. */
+  --title-bar-height: 52px;
+  --title-bar-inset-left: 16px;
+  --title-bar-inset-right: 16px;
+}
+html[data-platform="mac"] {
+  --title-bar-inset-left: 84px; /* the traffic lights */
+}
+html[data-platform="other"] {
+  --title-bar-inset-right: 150px; /* minimise / maximise / close */
+}
+.drag-strip {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: var(--title-bar-height);
+  -webkit-app-region: drag;
+}

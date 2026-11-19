@@ -1,0 +1,78 @@
+appId: com.reqlab.app
+productName: ReqLab
+copyright: Copyright © 2026 ReqLab
+
+directories:
+  output: release
+  buildResources: resources
+
+files:
+  - out/**/*
+  - package.json
+  - "!**/*.map"
+  # The database library loads a ready-made file from prebuilds/ (Node-API, one per platform);
+  # its C sources and any local compile are not needed in the app.
+  - "!**/node_modules/better-sqlite3-multiple-ciphers/{build,deps,src}/**"
+
+# No rebuilding of native modules: the database library's prebuilds already cover every platform,
+# and compiling them for Windows from a Mac is not possible.
+npmRebuild: false
+
+asar: true
+asarUnpack:
+  - "**/*.node"
+
+# Electron Fuses: switched off at package time, cannot be turned back on at runtime.
+electronFuses:
+  runAsNode: false
+  enableCookieEncryption: true
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  enableEmbeddedAsarIntegrityValidation: true
+  onlyLoadAppFromAsar: true
+  loadBrowserProcessSpecificV8Snapshot: false
+  grantFileProtocolExtraPrivileges: false
+
+win:
+  icon: resources/icon.ico
+  # Only Windows needs the Windows files of the database library.
+  files:
+    - "!**/node_modules/better-sqlite3-multiple-ciphers/prebuilds/{darwin,linux,linuxmusl}-*.node"
+  # An x64 installer, and a portable .zip (x64) that runs without installing.
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: zip
+      arch: [x64]
+nsis:
+  oneClick: false
+  perMachine: false
+  allowElevation: false
+
+mac:
+  icon: resources/icon.icns
+  # Only macOS needs the macOS files (each build keeps both; the app loads the one for its processor).
+  files:
+    - "!**/node_modules/better-sqlite3-multiple-ciphers/prebuilds/{win32,linux,linuxmusl}-*.node"
+  # One .dmg installer for Intel Macs (x64) and one for Apple silicon (arm64).
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+  artifactName: "${productName}-${version}-mac-${arch}.${ext}"
+  category: public.app-category.developer-tools
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: resources/entitlements.mac.plist
+  entitlementsInherit: resources/entitlements.mac.plist
+  # Notarization is turned on by the release workflow (needs Apple credentials).
+  notarize: false
+
+linux:
+  icon: resources/icon.png
+  files:
+    - "!**/node_modules/better-sqlite3-multiple-ciphers/prebuilds/{darwin,win32}-*.node"
+  target: [AppImage, deb, rpm]
+  category: Development
+
+# No auto-publishing; releases are uploaded by the release workflow after signing.
+publish: null

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- ReqLab's app icon: a paper plane (sending a request) with motion lines, on a dark rounded
+       square (macOS keeps a 100 px margin). -->
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#262c38"/>
+      <stop offset="1" stop-color="#0f1115"/>
+    </linearGradient>
+    <linearGradient id="plane" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#f0a030"/>
+      <stop offset="1" stop-color="#ffc266"/>
+    </linearGradient>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#background)"/>
+  <rect x="100.5" y="100.5" width="823" height="823" rx="184.5" fill="none" stroke="#ffffff" stroke-opacity="0.08"/>
+  <!-- Motion lines behind the plane. -->
+  <g stroke="#f0a030" stroke-width="30" stroke-linecap="round" fill="none">
+    <path d="M232 690l86-86" stroke-opacity="0.55"/>
+    <path d="M300 772l64-64" stroke-opacity="0.4"/>
+    <path d="M214 572l52-52" stroke-opacity="0.3"/>
+  </g>
+  <!-- The plane: body, then the fold. -->
+  <path d="M790 262 L604 790 L498 556 L264 450 Z" fill="url(#plane)" stroke="url(#plane)" stroke-width="22" stroke-linejoin="round"/>
+  <path d="M790 262 L498 556" stroke="#a86410" stroke-width="22" stroke-linecap="round"/>
+  <path d="M498 556 L604 790 L560 600 Z" fill="#000000" fill-opacity="0.16"/>
+</svg>

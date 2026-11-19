@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+
+# Build output (electron-vite: out/, electron-builder: release/)
+out/
+dist/
+release/
+
+# Logs and debug output
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Tool caches
+.eslintcache
+*.tsbuildinfo
+.vite/
+coverage/
+
+# Local secrets and environment files (never commit credentials)
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+*.key
+
+# ReqLab data that may end up next to the app or in the project while testing:
+# encrypted workspaces, the app database, keys and the portable-mode data folder
+*.rldb
+*.rldb-wal
+*.rldb-shm
+app.db
+app.db-wal
+app.db-shm
+keys.json
+data-location.json
+ReqLab Data/
+portable.flag
+
+# Editors and operating systems
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local AI assistant settings
+.claude/settings.local.json
