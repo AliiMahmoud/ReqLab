@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { WorkspaceScoped } from "./collection";
 
+/** No proxy (always direct), the computer's proxy settings, or a custom HTTP proxy. */
+export const ProxyMode = z.enum(["none", "system", "custom"]);
+export type ProxyMode = z.infer<typeof ProxyMode>;
+
 /** What the UI may see. Certificates appear by name and subject; private keys and passwords never. */
 export const NetworkSettingsView = z.object({
   verifyTls: z.boolean(),
@@ -17,7 +21,7 @@ export const NetworkSettingsView = z.object({
     }),
   ),
   proxy: z.object({
-    isEnabled: z.boolean(),
+    mode: ProxyMode,
     url: z.string(),
     bypass: z.string(),
     hasCredentials: z.boolean(),
@@ -42,7 +46,7 @@ export const ProxyUrl = z
 export const UpdateNetworkSettingsInput = WorkspaceScoped.extend({
   verifyTls: z.boolean(),
   proxy: z.object({
-    isEnabled: z.boolean(),
+    mode: ProxyMode,
     url: ProxyUrl,
     bypass: z.string().max(4_096),
     /** Undefined keeps the stored credentials; empty strings remove them. */

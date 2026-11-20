@@ -36,7 +36,7 @@ export class NetworkSettingsStore {
         }),
       ),
       proxy: {
-        isEnabled: settings.proxy.isEnabled,
+        mode: settings.proxy.mode,
         url: settings.proxy.url,
         bypass: settings.proxy.bypass,
         hasCredentials: settings.proxy.username !== "",
@@ -51,7 +51,7 @@ export class NetworkSettingsStore {
       ...current,
       verifyTls: input.verifyTls,
       proxy: {
-        isEnabled: input.proxy.isEnabled,
+        mode: input.proxy.mode,
         url: input.proxy.url,
         bypass: input.proxy.bypass,
         username,

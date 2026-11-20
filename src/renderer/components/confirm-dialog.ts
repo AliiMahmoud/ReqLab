@@ -9,6 +9,7 @@ import {
 import { dialogStyles } from "./dialog-styles";
 import { closeIcon } from "./icons";
 import { formStyles } from "./shared-styles";
+import { showModal } from "./modal-dialog";
 
 /**
  * The app's one question dialog: Cancel, the primary action and, when asked for, a second action
@@ -88,7 +89,7 @@ export class ConfirmDialog extends LitElement {
     const isAsking = pendingConfirmation.get() !== undefined;
     if (isAsking && !dialog.open) {
       this.renderRoot.querySelector("form")?.reset();
-      dialog.showModal();
+      showModal(dialog);
       this.renderRoot.querySelector<HTMLButtonElement>("button.primary")?.focus();
     }
     if (!isAsking && dialog.open) dialog.close();

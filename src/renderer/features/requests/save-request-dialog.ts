@@ -23,6 +23,7 @@ import {
   type SaveLocation,
 } from "./save-location";
 import { saveRequestDialogStyles } from "./save-request-dialog-styles";
+import { showModal } from "../../components/modal-dialog";
 
 /** Remembered between saves, like Postman: the next save starts where the last one went. */
 let lastLocation: SaveLocation = ALL_COLLECTIONS;
@@ -73,7 +74,7 @@ export class SaveRequestDialog extends LitElement {
     this.isCreating = false;
     void this.updateComplete.then(() => {
       this.renderRoot.querySelector("form")?.reset();
-      this.renderRoot.querySelector("dialog")?.showModal();
+      showModal(this.renderRoot.querySelector("dialog"));
       this.renderRoot.querySelector<HTMLInputElement>("input[name=name]")?.select();
     });
     return outcome;

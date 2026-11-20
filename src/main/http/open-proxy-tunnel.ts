@@ -2,6 +2,7 @@ import http from "node:http";
 import type { Socket } from "node:net";
 import { RequestFailed } from "../errors";
 import type { ProxyRoute } from "../network/network-plan";
+import { keepSocketErrorsHandled } from "./keep-socket-errors-handled";
 
 /**
  * Asks an HTTP proxy for a CONNECT tunnel to the target, so the TLS session runs end to end
@@ -36,6 +37,8 @@ function settleTunnel(
   socket: Socket,
   outcome: { resolve: (socket: Socket) => void; reject: (error: Error) => void },
 ): void {
+  // Node has just removed its own listeners from this socket; a later reset must not crash the app.
+  keepSocketErrorsHandled(socket);
   if (response.statusCode === 200) {
     outcome.resolve(socket);
     return;

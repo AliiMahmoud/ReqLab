@@ -19,10 +19,8 @@ export interface ProxyRoute {
 /** How to reach one URL: which TLS options to use and whether to go through the proxy. */
 export interface NetworkPlan {
   tlsOptionsFor(url: URL): TlsOptions;
-  /** The custom proxy when it is on; otherwise the system's proxy (or none). */
+  /** Per Settings › Network › Proxy: none, the system's proxy, or the custom one. */
   proxyFor(url: URL): Promise<ProxyRoute | undefined>;
-  /** True when certificate checks are off (shown as a warning). */
-  isTlsVerificationOff: boolean;
 }
 
 export function createNetworkPlan(settings: StoredNetworkSettings): NetworkPlan {
@@ -32,7 +30,6 @@ export function createNetworkPlan(settings: StoredNetworkSettings): NetworkPlan 
       ? undefined
       : [...rootCertificates, ...settings.caCertificates.map((entry) => entry.pem)];
   return {
-    isTlsVerificationOff: !settings.verifyTls,
     tlsOptionsFor: (url) => {
       const client = settings.clientCertificates.find((entry) => hostMatches(url.hostname, entry.host));
       return {
@@ -51,7 +48,8 @@ async function proxyRoute(
   proxy: StoredNetworkSettings["proxy"],
   target: URL,
 ): Promise<ProxyRoute | undefined> {
-  if (!proxy.isEnabled) {
+  if (proxy.mode === "none") return undefined;
+  if (proxy.mode === "system") {
     const system = await findSystemProxy(target);
     return system === undefined ? undefined : { url: system, authorization: undefined };
   }

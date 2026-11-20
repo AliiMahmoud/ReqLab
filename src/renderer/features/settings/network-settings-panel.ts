@@ -1,5 +1,5 @@
 import { css, html, LitElement, type TemplateResult } from "lit";
-import type { NetworkSettingsView } from "@shared/models/network-settings";
+import type { NetworkSettingsView, ProxyMode } from "@shared/models/network-settings";
 import { api } from "../../api";
 import { trashIcon } from "../../components/icons";
 import { formStyles, readField } from "../../components/shared-styles";
@@ -7,17 +7,12 @@ import { watch } from "../../controllers/signal-watcher";
 import { loadNetworkSettings, networkSettings, showNetworkSettings } from "../../stores/network-store";
 import { callApi } from "../../stores/notice-store";
 import { settingRowStyles } from "./setting-row-styles";
-import {
-  inputValue,
-  isChecked,
-  preventSubmit,
-  renderProxyCredentials,
-  renderSwitchRow,
-} from "./network-settings-parts";
+import { inputValue, isChecked, preventSubmit, renderSwitchRow } from "./network-settings-parts";
+import { isProxyMode, renderProxySection } from "./proxy-settings-parts";
 
 /**
  * Per-workspace network settings: TLS verification, extra CA certificates, client certificates (mTLS)
- * and an HTTP proxy. Certificate files are picked by main; keys and passwords never come back here.
+ * and the proxy (none, system or custom). Certificate files are picked by main; keys and passwords never come back here.
  */
 export class NetworkSettingsPanel extends LitElement {
   static override styles = [
@@ -38,7 +33,7 @@ export class NetworkSettingsPanel extends LitElement {
       .switch-row .hint {
         margin: 2px 0 0;
       }
-      /* Proxy fields are unused while the custom proxy is off. */
+      /* The custom proxy's fields are unused in the other proxy modes. */
       .is-off .row {
         opacity: 0.45;
       }
@@ -123,40 +118,9 @@ export class NetworkSettingsPanel extends LitElement {
           })}
           ${settings.verifyTls ? undefined : html`<p class="warning">⚠ Off: the server's identity is not checked. Use only for local or test servers.</p>`}
         </section>
-        ${this.renderProxy(settings)}
+        ${renderProxySection(settings.proxy, this.chooseProxyMode)}
       </form>
       ${this.renderCaCertificates(settings)} ${this.renderClientCertificates(settings)}`;
-  }
-
-  private renderProxy(settings: NetworkSettingsView): TemplateResult {
-    const { proxy } = settings;
-    const isOff = !proxy.isEnabled;
-    return html`<section class=${isOff ? "is-off" : ""}>
-      ${renderSwitchRow({
-        name: "proxyEnabled",
-        title: "Custom proxy",
-        hint: isOff ? "Off: requests follow the system proxy." : "Requests go through this HTTP proxy.",
-        isOn: proxy.isEnabled,
-      })}
-      <div class="row">
-        <input
-          ?disabled=${isOff}
-          name="proxyUrl"
-          aria-label="Proxy URL"
-          placeholder="http://proxy.local:8080"
-          .value=${proxy.url}
-        />
-        <input
-          ?disabled=${isOff}
-          name="proxyBypass"
-          aria-label="Bypass list"
-          placeholder="localhost, *.internal"
-          .value=${proxy.bypass}
-        />
-      </div>
-      ${renderProxyCredentials(proxy.hasCredentials, isOff)}
-      <p class="hint">https goes through a CONNECT tunnel, so the proxy cannot read it.</p>
-    </section>`;
   }
 
   private renderCaCertificates(settings: NetworkSettingsView): TemplateResult {
@@ -214,8 +178,17 @@ export class NetworkSettingsPanel extends LitElement {
     </button>`;
   }
 
-  private readonly saveGeneral = async (event: Event): Promise<void> => {
-    const form = event.currentTarget as HTMLFormElement;
+  private readonly saveGeneral = (event: Event): void => {
+    const mode = networkSettings.get()?.proxy.mode ?? "system";
+    void this.save(event.currentTarget as HTMLFormElement, mode);
+  };
+
+  private readonly chooseProxyMode = (mode: string): void => {
+    const form = this.renderRoot.querySelector("form");
+    if (form !== null && isProxyMode(mode)) void this.save(form, mode);
+  };
+
+  private async save(form: HTMLFormElement, mode: ProxyMode): Promise<void> {
     const username = inputValue(form, "proxyUsername");
     const password = inputValue(form, "proxyPassword");
     const credentials = username === "" && password === "" ? {} : { username, password };
@@ -224,7 +197,7 @@ export class NetworkSettingsPanel extends LitElement {
         workspaceId: this.workspaceId,
         verifyTls: isChecked(form, "verifyTls"),
         proxy: {
-          isEnabled: isChecked(form, "proxyEnabled"),
+          mode,
           url: inputValue(form, "proxyUrl"),
           bypass: inputValue(form, "proxyBypass"),
           ...credentials,
@@ -232,7 +205,7 @@ export class NetworkSettingsPanel extends LitElement {
       }),
     );
     showNetworkSettings(saved);
-  };
+  }
 
   private readonly addCaCertificate = async (): Promise<void> => {
     showNetworkSettings(await callApi(api.addCaCertificate({ workspaceId: this.workspaceId })));

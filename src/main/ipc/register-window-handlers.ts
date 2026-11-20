@@ -1,5 +1,5 @@
 import { BrowserWindow } from "electron";
-import { applyWindowTheme } from "../security/title-bar";
+import { applyWindowTheme, setWindowModal } from "../security/title-bar";
 import type { IpcRouter } from "./ipc-router";
 
 export function registerWindowHandlers(router: IpcRouter): void {
@@ -11,6 +11,11 @@ export function registerWindowHandlers(router: IpcRouter): void {
   });
   router.handle("window:set-theme", ({ theme, colors }) => {
     for (const window of BrowserWindow.getAllWindows()) applyWindowTheme(window, theme, colors);
+    return true as const;
+  });
+  // A dialog is open in the page: the window's own buttons wait until it closes.
+  router.handle("window:set-modal", ({ isOpen }) => {
+    for (const window of BrowserWindow.getAllWindows()) setWindowModal(window, isOpen);
     return true as const;
   });
 }

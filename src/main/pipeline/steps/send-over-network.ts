@@ -1,37 +1,31 @@
 import { answerDigestChallenge, parseDigestChallenge } from "../../auth/digest-auth";
 import { RequestCancelled, RequestFailed } from "../../errors";
 import { describeNetworkError } from "../../http/describe-network-error";
-import { sendFollowingRedirects } from "../../http/follow-redirects";
+import { sendFollowingRedirects, type RedirectOptions } from "../../http/follow-redirects";
 import { findHeader, type FinalResponse, type PreparedRequest } from "../../http/http-types";
 import { createNetworkPlan, type NetworkPlan } from "../../network/network-plan";
 import type { NetworkSettingsStore } from "../../network/network-settings-store";
 import type { RequestSettingsStore } from "../../network/request-settings-store";
-import type { ExchangeOptions } from "../../http/send-one-exchange";
 import { requireValue, type PipelineStep, type RequestContext } from "../request-context";
 
-/** Sends with the workspace's TLS and proxy settings; warns when certificate checks are off. */
+/** Sends with the workspace's TLS and proxy settings (the URL bar shows "TLS off" when checks are off). */
 export function sendOverNetwork(
   networkSettings: NetworkSettingsStore,
   requestSettings: RequestSettingsStore,
 ): PipelineStep {
   return async (context) => {
     const network = createNetworkPlan(networkSettings.read(context.input.workspaceId));
-    const maxResponseBytes = requestSettings.read(context.input.workspaceId).maxResponseMb * 1024 * 1024;
-    if (network.isTlsVerificationOff && context.prepared?.url.protocol === "https:") {
-      context.warnings.push(
-        "TLS certificate verification is off for this workspace: the server's identity was not checked.",
-      );
-    }
-    await sendWith(context, { network, maxResponseBytes });
+    const { maxResponseMb, followRedirects } = requestSettings.read(context.input.workspaceId);
+    await sendWith(context, { network, maxResponseBytes: maxResponseMb * 1024 * 1024, followRedirects });
   };
 }
 
 async function sendWith(
   context: RequestContext,
-  { network, maxResponseBytes }: { network: NetworkPlan; maxResponseBytes: number },
+  settings: { network: NetworkPlan; maxResponseBytes: number; followRedirects: boolean },
 ): Promise<void> {
   const prepared = requireValue(context.prepared, "sendOverNetwork");
-  const options = { signal: context.signal, network, maxResponseBytes };
+  const options: RedirectOptions = { signal: context.signal, ...settings };
   try {
     const first = await sendFollowingRedirects(prepared, options);
     context.response = (await answerDigestOnce(context, prepared, { first, options })) ?? first;
@@ -46,7 +40,7 @@ async function sendWith(
 async function answerDigestOnce(
   context: RequestContext,
   prepared: PreparedRequest,
-  { first: response, options }: { first: FinalResponse; options: ExchangeOptions },
+  { first: response, options }: { first: FinalResponse; options: RedirectOptions },
 ): Promise<FinalResponse | undefined> {
   const auth = context.resolved?.auth;
   if (auth?.type !== "digest" || !isDigestChallenge(prepared, response)) return undefined;

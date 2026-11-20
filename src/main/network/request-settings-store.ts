@@ -7,14 +7,16 @@ const KEY = "request";
 const Stored = z.object({
   timeoutMs: z.number().int().min(0).max(3_600_000),
   maxResponseMb: z.number().int().min(1).max(1024),
+  // Saved before this setting existed: redirects were always followed.
+  followRedirects: z.boolean().default(true),
   disableCookies: z.boolean(),
 });
 type Stored = z.infer<typeof Stored>;
 
-/** Postman-like defaults: no timeout, 50 MB responses, cookies on. */
-const DEFAULTS: Stored = { timeoutMs: 0, maxResponseMb: 50, disableCookies: false };
+/** Defaults: no timeout, 50 MB responses, redirects followed, cookies on. */
+const DEFAULTS: Stored = { timeoutMs: 0, maxResponseMb: 50, followRedirects: true, disableCookies: false };
 
-/** Timeout, response size and cookies per workspace; certificate checks live in the network settings. */
+/** Timeout, response size, redirects and cookies per workspace; certificate checks live in the network settings. */
 export class RequestSettingsStore {
   constructor(
     private readonly data: WorkspaceData,

@@ -23,6 +23,7 @@ export const apiMethods = {
   exportWorkspace: "export:workspace",
   setWindowTheme: "window:set-theme",
   setWindowZoom: "window:set-zoom",
+  setWindowModal: "window:set-modal",
   getOAuth2Status: "oauth2:status",
   getOAuth2Token: "oauth2:get-token",
   clearOAuth2Token: "oauth2:clear",

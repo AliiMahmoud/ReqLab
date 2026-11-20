@@ -98,6 +98,7 @@ export const ipcContract = {
   "export:workspace": { input: ExportWorkspaceInput, output: ExportResult },
 
   "window:set-zoom": { input: z.object({ factor: z.number().min(0.75).max(1.5) }), output: Done },
+  "window:set-modal": { input: z.object({ isOpen: z.boolean() }), output: Done },
   "window:set-theme": {
     input: z.object({
       theme: z.enum(["light", "dark"]),

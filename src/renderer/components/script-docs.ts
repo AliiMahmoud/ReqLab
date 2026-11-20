@@ -2,6 +2,7 @@ import { css, html, LitElement, type TemplateResult } from "lit";
 import { closeIcon } from "./icons";
 import { renderScriptDocs } from "./script-docs-content";
 import { formStyles } from "./shared-styles";
+import { showModal } from "./modal-dialog";
 
 /** The scripts' "?" button and the reference window it opens (the pm API, assertions, examples). */
 export class ScriptDocs extends LitElement {
@@ -137,7 +138,7 @@ export class ScriptDocs extends LitElement {
 
   private readonly open = (): void => {
     // Focus starts on the text (autofocus): arrow keys scroll it, and no ring lands on the close button.
-    this.renderRoot.querySelector("dialog")?.showModal();
+    showModal(this.renderRoot.querySelector("dialog"));
   };
 
   private readonly close = (): void => {

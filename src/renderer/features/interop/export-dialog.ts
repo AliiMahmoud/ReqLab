@@ -4,6 +4,7 @@ import { dialogStyles } from "../../components/dialog-styles";
 import { formStyles } from "../../components/shared-styles";
 import { exportWorkspace } from "../../stores/interop-store";
 import { showNotice } from "../../stores/notice-store";
+import { showModal } from "../../components/modal-dialog";
 
 /** Export the workspace as a .reqlab bundle (not encrypted: it holds every variable value as it is). */
 export class ExportDialog extends LitElement {
@@ -27,7 +28,7 @@ export class ExportDialog extends LitElement {
     this.error = undefined;
     await this.updateComplete;
     this.renderRoot.querySelector("form")?.reset();
-    this.renderRoot.querySelector("dialog")?.showModal();
+    showModal(this.renderRoot.querySelector("dialog"));
   }
 
   override render(): TemplateResult {

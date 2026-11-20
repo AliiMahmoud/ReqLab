@@ -11,6 +11,7 @@ import {
   isBusy,
   renameWorkspace,
 } from "../../stores/workspace-store";
+import { showModal } from "../../components/modal-dialog";
 
 export type WorkspaceDialogKind = "create" | "rename" | "delete";
 
@@ -57,7 +58,7 @@ export class WorkspaceDialogs extends LitElement {
     this.kind = kind;
     await this.updateComplete;
     this.renderRoot.querySelector("form")?.reset();
-    this.renderRoot.querySelector("dialog")?.showModal();
+    showModal(this.renderRoot.querySelector("dialog"));
   }
 
   override render(): TemplateResult {

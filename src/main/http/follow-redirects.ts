@@ -7,10 +7,15 @@ const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 const CREDENTIAL_HEADERS = ["authorization", "cookie", "proxy-authorization"];
 const BODY_HEADERS = ["content-type", "content-length", "content-encoding"];
 
+export interface RedirectOptions extends ExchangeOptions {
+  /** False (Settings › Request): the first response is returned, even a redirect. Default: true. */
+  followRedirects?: boolean;
+}
+
 /** Sends a request and follows up to 10 redirects. Credentials never follow a redirect to another origin. */
 export async function sendFollowingRedirects(
   request: PreparedRequest,
-  options: ExchangeOptions,
+  options: RedirectOptions,
 ): Promise<FinalResponse> {
   let current = request;
   let totalMs = 0;
@@ -18,7 +23,8 @@ export async function sendFollowingRedirects(
     const response = await sendOneExchange(current, options);
     totalMs += response.timings.total;
     const location = findHeader(response.headers, "location");
-    if (!REDIRECT_STATUSES.has(response.status) || location === undefined) {
+    const isRedirect = REDIRECT_STATUSES.has(response.status) && location !== undefined;
+    if (!isRedirect || options.followRedirects === false) {
       return {
         ...response,
         timings: { ...response.timings, total: totalMs },

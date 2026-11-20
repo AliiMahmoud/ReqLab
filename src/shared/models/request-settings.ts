@@ -7,6 +7,8 @@ export const RequestSettings = z.object({
   timeoutMs: z.number().int().min(0).max(3_600_000),
   /** Bigger responses are stopped; kept in memory, so it is capped. */
   maxResponseMb: z.number().int().min(1).max(1024),
+  /** Off: a 3xx response is shown as it is, with its Location header. */
+  followRedirects: z.boolean(),
   /** Off: cookies are neither sent from nor saved into the jar. */
   disableCookies: z.boolean(),
   /** The same switch as Network › Verify server certificates. */

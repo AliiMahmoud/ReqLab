@@ -5,6 +5,7 @@ import { dialogStyles } from "../../components/dialog-styles";
 import { formStyles, readField } from "../../components/shared-styles";
 import { chooseImportFiles, runImport } from "../../stores/interop-store";
 import { showCreatedWorkspace } from "../../stores/workspace-store";
+import { showModal } from "../../components/modal-dialog";
 
 /**
  * Import a workspace: main's file dialog picks the files, then the user names the new workspace
@@ -38,7 +39,7 @@ export class ImportDialog extends LitElement {
     if (this.chosen === undefined && this.error === undefined) return;
     await this.updateComplete;
     this.renderRoot.querySelector("form")?.reset();
-    this.renderRoot.querySelector("dialog")?.showModal();
+    showModal(this.renderRoot.querySelector("dialog"));
   }
 
   override render(): TemplateResult {

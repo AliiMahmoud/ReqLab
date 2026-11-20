@@ -1,7 +1,7 @@
 import { app, BrowserWindow, type WebPreferences } from "electron";
 import { MainEvents } from "@shared/main-events";
 import { getRendererEntryUrl } from "./app-origin";
-import { titleBarOptions } from "./title-bar";
+import { setWindowModal, titleBarOptions } from "./title-bar";
 
 export async function openMainWindow(preloadPath: string): Promise<BrowserWindow> {
   const window = new BrowserWindow({
@@ -22,8 +22,19 @@ export async function openMainWindow(preloadPath: string): Promise<BrowserWindow
     if (direction === "left") window.webContents.send(MainEvents.menuCommand, "go-back");
     if (direction === "right") window.webContents.send(MainEvents.menuCommand, "go-forward");
   });
+  releaseButtonsWhenPageIsGone(window);
   await window.loadURL(getRendererEntryUrl());
   return window;
+}
+
+/** A page that reloads, crashes or hangs cannot close its dialog: the window must stay closable. */
+function releaseButtonsWhenPageIsGone(window: BrowserWindow): void {
+  const release = (): void => {
+    setWindowModal(window, false);
+  };
+  window.webContents.on("did-start-loading", release);
+  window.webContents.on("render-process-gone", release);
+  window.on("unresponsive", release);
 }
 
 function secureWebPreferences(preloadPath: string): WebPreferences {

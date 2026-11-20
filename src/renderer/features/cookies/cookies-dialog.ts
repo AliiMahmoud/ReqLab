@@ -6,6 +6,7 @@ import { trashIcon } from "../../components/icons";
 import { formStyles } from "../../components/shared-styles";
 import { askToConfirm } from "../../stores/confirm-store";
 import { callApi } from "../../stores/notice-store";
+import { showModal } from "../../components/modal-dialog";
 
 /** The workspace's cookie jar: cookies received from servers, by domain. Delete one or clear them all. */
 export class CookiesDialog extends LitElement {
@@ -71,7 +72,7 @@ export class CookiesDialog extends LitElement {
 
   async open(): Promise<void> {
     await this.reload();
-    this.renderRoot.querySelector("dialog")?.showModal();
+    showModal(this.renderRoot.querySelector("dialog"));
   }
 
   override render(): TemplateResult {

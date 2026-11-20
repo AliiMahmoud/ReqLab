@@ -4,6 +4,7 @@ import { connect as tlsConnect } from "node:tls";
 import type { NetworkPlan, ProxyRoute } from "../network/network-plan";
 import { openProxyTunnel } from "./open-proxy-tunnel";
 import { ExchangeTimer } from "./exchange-timer";
+import { keepSocketErrorsHandled } from "./keep-socket-errors-handled";
 import type { HeaderList, PreparedRequest, RawResponse } from "./http-types";
 import { readResponseBody } from "./response-body-reader";
 
@@ -41,8 +42,13 @@ async function planRoute(request: PreparedRequest, { signal, network }: Exchange
   if (proxy === undefined)
     return { target: request.url, options: tlsOptions, transport: isHttps ? https : http };
   if (isHttps) {
-    const socket = await openProxyTunnel(proxy, request.url, signal);
-    const createConnection = () => tlsConnect({ ...tlsOptions, socket, servername: request.url.hostname });
+    const tunnel = await openProxyTunnel(proxy, request.url, signal);
+    const createConnection = () => {
+      const secure = tlsConnect({ ...tlsOptions, socket: tunnel, servername: request.url.hostname });
+      // Close the tunnel with the TLS session, so no idle connection is left for the proxy to reset.
+      secure.once("close", () => tunnel.destroy());
+      return secure;
+    };
     return { target: request.url, options: { ...tlsOptions, createConnection }, transport: https };
   }
   return plainProxyRoute(request, proxy);
@@ -71,6 +77,7 @@ function exchange(
         : route.transport.request(route.target, options);
     // No timer of its own: only Settings › Request timeout (in `signal`) or Cancel stops it.
     outgoing.on("socket", (socket) => {
+      keepSocketErrorsHandled(socket);
       timer.watchSocket(socket);
     });
     outgoing.on("response", (response) => {

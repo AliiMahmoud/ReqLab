@@ -7,7 +7,7 @@ import { callApi } from "../../stores/notice-store";
 import { settingsDialogStyles } from "./settings-dialog-styles";
 import { settingRowStyles } from "./setting-row-styles";
 
-/** Settings › General › Request: timeout, response size, certificate checks and cookies (per workspace). */
+/** Settings › General › Request: timeout, response size, redirects, certificate checks and cookies (per workspace). */
 export class RequestSettingsSection extends LitElement {
   static override styles = [formStyles, settingsDialogStyles, settingRowStyles];
   static override properties = { workspaceId: { attribute: false }, settings: { state: true } };
@@ -28,6 +28,7 @@ export class RequestSettingsSection extends LitElement {
     return html`<h3 class="group">Request</h3>
       ${this.renderNumber({ label: "Request timeout (ms)", hint: "0 = no timeout.", field: "timeoutMs", min: 0, max: 3_600_000 })}
       ${this.renderNumber({ label: "Max response size (MB)", hint: "Bigger responses are stopped.", field: "maxResponseMb", min: 1, max: 1024 })}
+      ${this.renderToggle("followRedirects", "Follow redirects", "Off: a 3xx response is shown as it is.")}
       ${this.renderToggle("verifyTls", "SSL certificate verification", "Off: the server's identity is not checked.")}
       ${this.renderToggle("disableCookies", "Disable cookies", "Cookies are neither sent nor saved.")}`;
   }
@@ -59,7 +60,11 @@ export class RequestSettingsSection extends LitElement {
     </div>`;
   }
 
-  private renderToggle(field: "verifyTls" | "disableCookies", label: string, hint: string): TemplateResult {
+  private renderToggle(
+    field: "verifyTls" | "followRedirects" | "disableCookies",
+    label: string,
+    hint: string,
+  ): TemplateResult {
     const change = (event: Event): void => {
       void this.save({ [field]: (event.target as HTMLInputElement).checked });
     };

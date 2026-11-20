@@ -15,6 +15,7 @@ import { settingRowStyles } from "./setting-row-styles";
 import { appSettings } from "../../stores/app-settings-store";
 import "./network-settings-panel";
 import { settingsDialogStyles } from "./settings-dialog-styles";
+import { showModal } from "../../components/modal-dialog";
 
 type Section = "general" | "theme" | "network";
 
@@ -47,7 +48,7 @@ export class SettingsDialog extends LitElement {
   async open(section: Section = "general"): Promise<void> {
     this.section = section;
     await this.updateComplete;
-    this.renderRoot.querySelector("dialog")?.showModal();
+    showModal(this.renderRoot.querySelector("dialog"));
   }
 
   override render(): TemplateResult {
