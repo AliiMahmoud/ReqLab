@@ -30,6 +30,7 @@ import { CookieKeyInput, StoredCookie } from "./models/cookie";
 import { ParseCurlInput, ParsedCurl } from "./models/curl";
 import { ChosenDataFolder, DataLocation, MoveDataInput } from "./models/data-location";
 import { RequestSettings, UpdateRequestSettingsInput } from "./models/request-settings";
+import { NetworkLogInput, NetworkLogView } from "./models/network-log";
 import {
   ContainerInput,
   ContainerSettings,
@@ -123,6 +124,7 @@ export const ipcContract = {
     output: NetworkSettingsView.nullable(),
   },
   "network:remove-certificate": { input: RemoveCertificateInput, output: NetworkSettingsView },
+  "network:describe-system-proxy": { input: z.undefined(), output: z.string().max(500) },
 
   "collections:get-tree": { input: WorkspaceScoped, output: CollectionTree },
   "collections:create": { input: CreateCollectionInput, output: Collection },
@@ -156,6 +158,8 @@ export const ipcContract = {
 
   "http:send": { input: SendRequestInput, output: ResponseView },
   "http:cancel": { input: CancelRequestInput, output: Done },
+  "http:copy-log": { input: NetworkLogInput, output: Done },
+  "http:get-log": { input: NetworkLogInput, output: NetworkLogView.nullable() },
   "http:copy-as-curl": { input: SendRequestInput, output: z.object({ containsSecrets: z.boolean() }) },
 
   "cookies:list": { input: WorkspaceScoped, output: z.array(StoredCookie) },

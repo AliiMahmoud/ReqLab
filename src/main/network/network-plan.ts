@@ -1,4 +1,6 @@
 import { rootCertificates } from "node:tls";
+import { RequestFailed } from "../errors";
+import { isBypassed } from "./bypass-list";
 import type { StoredNetworkSettings } from "./stored-network-settings";
 import { findSystemProxy } from "./system-proxy";
 
@@ -49,18 +51,36 @@ async function proxyRoute(
   target: URL,
 ): Promise<ProxyRoute | undefined> {
   if (proxy.mode === "none") return undefined;
-  if (proxy.mode === "system") {
-    const system = await findSystemProxy(target);
-    return system === undefined ? undefined : { url: system, authorization: undefined };
-  }
+  if (proxy.mode === "system") return systemRoute(target);
   if (proxy.url === "") return undefined;
-  const bypass = proxy.bypass.split(/[\s,]+/).filter(Boolean);
-  if (bypass.some((pattern) => hostMatches(target.hostname, pattern.replace(/^\./, "*.")))) return undefined;
-  const authorization =
-    proxy.username === ""
-      ? undefined
-      : `Basic ${Buffer.from(`${proxy.username}:${proxy.password}`).toString("base64")}`;
-  return { url: new URL(proxy.url), authorization };
+  if (isBypassed(target.hostname, proxy.bypass)) return undefined;
+  return {
+    url: new URL(proxy.url.includes("://") ? proxy.url : `http://${proxy.url}`),
+    authorization: basicAuthorization(proxy.username, proxy.password),
+  };
+}
+
+/** A system proxy ReqLab cannot use is an error, never a silent direct connection. */
+async function systemRoute(target: URL): Promise<ProxyRoute | undefined> {
+  const found = await findSystemProxy(target);
+  if (found.kind === "direct") return undefined;
+  if (found.kind === "unsupported") {
+    throw new RequestFailed(
+      `The system proxy is "${found.rule}", which ReqLab does not support (only HTTP proxies). ` +
+        "Choose Custom proxy or No proxy in Settings › Network.",
+    );
+  }
+  // An HTTP_PROXY-style address may carry its credentials: http://user:pass@proxy:8080.
+  const { username, password } = found.url;
+  return {
+    url: found.url,
+    authorization: basicAuthorization(decodeURIComponent(username), decodeURIComponent(password)),
+  };
+}
+
+function basicAuthorization(username: string, password: string): string | undefined {
+  if (username === "") return undefined;
+  return `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`;
 }
 
 /** "api.example.com" matches itself; "*.example.com" matches example.com and any subdomain. */

@@ -41,7 +41,11 @@ export const ProxyUrl = z
   .string()
   .trim()
   .max(2_048)
-  .refine((text) => text === "" || /^http:\/\/[^\s/]+(:\d+)?\/?$/i.test(text), "Use http://host:port.");
+  // As Windows shows it ("proxy.corp:8080") or with the scheme ("http://proxy.corp:8080").
+  .refine(
+    (text) => text === "" || /^(http:\/\/)?[^\s/:]+(:\d+)?\/?$/i.test(text),
+    "Use host:port or http://host:port.",
+  );
 
 export const UpdateNetworkSettingsInput = WorkspaceScoped.extend({
   verifyTls: z.boolean(),

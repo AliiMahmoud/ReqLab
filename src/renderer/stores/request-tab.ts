@@ -28,6 +28,8 @@ export interface RequestTab {
   error: string | undefined;
   /** Set while a request is in flight, so it can be cancelled. */
   sendingRequestId: string | undefined;
+  /** The last finished send, whose network log the Log button shows. */
+  lastRequestId?: string | undefined;
   editorSection: EditorSection;
   responseSection: ResponseSection;
   bodyView: BodyView;

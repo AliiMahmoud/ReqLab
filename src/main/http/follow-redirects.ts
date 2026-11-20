@@ -1,6 +1,7 @@
 import { RequestFailed } from "../errors";
 import { MAX_REDIRECTS } from "./http-limits";
 import { findHeader, withoutHeaders, type FinalResponse, type PreparedRequest } from "./http-types";
+import { urlForLog } from "./network-log-format";
 import { sendOneExchange, type ExchangeOptions } from "./send-one-exchange";
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
@@ -34,6 +35,7 @@ export async function sendFollowingRedirects(
     }
     if (redirectCount >= MAX_REDIRECTS) throw new RequestFailed("Stopped after 10 redirects.");
     current = buildRedirectedRequest(current, response.status, location);
+    options.log?.add(`Following redirect ${String(response.status)} to ${urlForLog(current.url)}`);
   }
 }
 

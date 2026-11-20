@@ -1,11 +1,9 @@
 import type { RequestAuth } from "@shared/models/auth";
 import type { KeyValue, RequestDefinition } from "@shared/models/request";
+import { REDACTED, SENSITIVE_NAME } from "../../http/sensitive-names";
 import { HistoryRepository } from "../../storage/repositories/history-repository";
 import type { WorkspaceService } from "../../workspaces/workspace-service";
 import type { RequestContext } from "../request-context";
-
-const REDACTED = "[redacted]";
-const SENSITIVE_NAME = /authorization|cookie|token|secret|password|api[-_]?key|^key$|signature/i;
 
 /**
  * Stores the request as the user wrote it (with {{variables}}, never their values),
@@ -24,9 +22,11 @@ export function recordInHistory(workspaces: WorkspaceService): (context: Request
   };
 }
 
+/** Only what was sent: the body types not in use are left out. */
 function redactDefinition(definition: RequestDefinition): RequestDefinition {
   return {
     ...definition,
+    otherBodies: undefined,
     url: redactUrl(definition.url),
     params: redactRows(definition.params),
     headers: redactRows(definition.headers),

@@ -2,6 +2,7 @@ import type { SendRequestInput } from "@shared/models/http-exchange";
 import type { RequestDefinition } from "@shared/models/request";
 import type { ScriptReport } from "@shared/models/script-report";
 import type { FinalResponse, PreparedRequest } from "../http/http-types";
+import type { NetworkLog } from "../http/network-log";
 import type { ResolvedScopes } from "../variables/variable-service";
 
 /** What travels through the pipeline. Each step reads what earlier steps filled in. */
@@ -26,6 +27,8 @@ export interface RequestContext {
   nestedRuns?: number;
   /** Tests, console output and errors of the scripts that ran. */
   scriptReport?: ScriptReport;
+  /** The network steps of this send, for the Log button (masked before it leaves main). */
+  readonly log: NetworkLog;
 }
 
 export type PipelineStep = (context: RequestContext) => void | Promise<void>;

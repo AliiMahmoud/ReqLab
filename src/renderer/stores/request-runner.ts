@@ -22,7 +22,12 @@ export async function sendTab(workspaceId: string, tabId: string): Promise<void>
   const result = await sendConfirmingProtected(workspaceId, tab, requestId);
   if (findTab(tabId)?.sendingRequestId !== requestId) return;
   const isCancelled = !result.ok && result.error.code === "request-cancelled";
-  updateTab(tabId, isCancelled ? { sendingRequestId: undefined, ...before } : describeOutcome(result));
+  updateTab(
+    tabId,
+    isCancelled
+      ? { sendingRequestId: undefined, ...before }
+      : { ...describeOutcome(result), lastRequestId: requestId },
+  );
   // Scripts may have set variables (pm.environment.set …): highlighting and hover cards follow.
   void refreshVisibleVariables();
   await loadHistory(workspaceId);

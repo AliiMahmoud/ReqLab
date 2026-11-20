@@ -21,17 +21,23 @@ export function isProxyMode(value: string): value is ProxyMode {
   return value in PROXY_HINTS;
 }
 
-/** The custom proxy's fields stay visible but disabled in the other modes, keeping their values. */
+/**
+ * The custom proxy's fields stay visible but disabled in the other modes, keeping their values.
+ * `detected` is what "System proxy" finds on this computer right now.
+ */
 export function renderProxySection(
   proxy: NetworkSettingsView["proxy"],
+  detected: string | undefined,
   chooseMode: (mode: string) => void,
 ): TemplateResult {
   const isOff = proxy.mode !== "custom";
+  const found =
+    proxy.mode === "system" && detected !== undefined ? html`<br />Found: ${detected}` : undefined;
   return html`<section class=${isOff ? "is-off" : ""}>
     <div class="switch-row">
       <div>
         <h3>Proxy</h3>
-        <p class="hint">${PROXY_HINTS[proxy.mode]}</p>
+        <p class="hint">${PROXY_HINTS[proxy.mode]}${found}</p>
       </div>
       <ui-select
         .options=${PROXY_MODES}
@@ -41,7 +47,10 @@ export function renderProxySection(
       ></ui-select>
     </div>
     ${renderProxyAddress(proxy, isOff)} ${renderProxyCredentials(proxy.hasCredentials, isOff)}
-    <p class="hint">https goes through a CONNECT tunnel, so the proxy cannot read it.</p>
+    <p class="hint">
+      Exceptions: addresses that start with these entries connect directly (separate with ;). https goes
+      through a CONNECT tunnel, so the proxy cannot read it.
+    </p>
   </section>`;
 }
 
@@ -51,14 +60,15 @@ function renderProxyAddress(proxy: NetworkSettingsView["proxy"], isOff: boolean)
       ?disabled=${isOff}
       name="proxyUrl"
       aria-label="Proxy URL"
-      placeholder="http://proxy.local:8080"
+      placeholder="proxy.corp:8080"
       .value=${proxy.url}
     />
     <input
       ?disabled=${isOff}
       name="proxyBypass"
-      aria-label="Bypass list"
-      placeholder="localhost, *.internal"
+      aria-label="Exceptions"
+      title="Addresses that start with these entries connect directly, as in Windows' proxy settings"
+      placeholder="Exceptions: localhost;10.*;*.corp.com;<local>"
       .value=${proxy.bypass}
     />
   </div>`;

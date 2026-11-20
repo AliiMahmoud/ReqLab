@@ -5,6 +5,7 @@ import type { NetworkPlan, ProxyRoute } from "../network/network-plan";
 import { openProxyTunnel } from "./open-proxy-tunnel";
 import { ExchangeTimer } from "./exchange-timer";
 import { keepSocketErrorsHandled } from "./keep-socket-errors-handled";
+import { NetworkLog } from "./network-log";
 import type { HeaderList, PreparedRequest, RawResponse } from "./http-types";
 import { readResponseBody } from "./response-body-reader";
 
@@ -14,6 +15,8 @@ export interface ExchangeOptions {
   network: NetworkPlan | undefined;
   /** Settings › Request › Max response size; the default limit when absent. */
   maxResponseBytes?: number;
+  /** Step-by-step notes for the Log button; none are kept when absent. */
+  log?: NetworkLog;
 }
 
 /** Where Node should connect and with which extra options (TLS, proxy, tunnel). */
@@ -31,18 +34,26 @@ export async function sendOneExchange(
   request: PreparedRequest,
   options: ExchangeOptions,
 ): Promise<RawResponse> {
-  return exchange(request, await planRoute(request, options), options);
+  const log = options.log ?? new NetworkLog();
+  log.startExchange(request);
+  return exchange(request, await planRoute(request, { ...options, log }), { ...options, log });
 }
 
 /** Direct; through the proxy (plain http, absolute URL); or through a CONNECT tunnel (https, end-to-end TLS). */
-async function planRoute(request: PreparedRequest, { signal, network }: ExchangeOptions): Promise<Route> {
+async function planRoute(
+  request: PreparedRequest,
+  { signal, network, log }: ExchangeOptions & { log: NetworkLog },
+): Promise<Route> {
   const isHttps = request.url.protocol === "https:";
   const tlsOptions = isHttps && network !== undefined ? network.tlsOptionsFor(request.url) : {};
   const proxy = await network?.proxyFor(request.url);
-  if (proxy === undefined)
+  if (proxy === undefined) {
+    log.noteNetwork("proxy", "none (direct)");
+    log.add("Proxy: none, connecting directly");
     return { target: request.url, options: tlsOptions, transport: isHttps ? https : http };
+  }
   if (isHttps) {
-    const tunnel = await openProxyTunnel(proxy, request.url, signal);
+    const tunnel = await openProxyTunnel(proxy, request.url, { signal, log });
     const createConnection = () => {
       const secure = tlsConnect({ ...tlsOptions, socket: tunnel, servername: request.url.hostname });
       // Close the tunnel with the TLS session, so no idle connection is left for the proxy to reset.
@@ -51,6 +62,8 @@ async function planRoute(request: PreparedRequest, { signal, network }: Exchange
     };
     return { target: request.url, options: { ...tlsOptions, createConnection }, transport: https };
   }
+  log.noteNetwork("proxy", `${proxy.url.host} (plain http)`);
+  log.add(`Proxy: sending plain http through ${proxy.url.host}`);
   return plainProxyRoute(request, proxy);
 }
 
@@ -64,12 +77,13 @@ function plainProxyRoute(request: PreparedRequest, proxy: ProxyRoute): Route {
 function exchange(
   request: PreparedRequest,
   route: Route,
-  { signal, maxResponseBytes }: ExchangeOptions,
+  { signal, maxResponseBytes, log }: ExchangeOptions & { log: NetworkLog },
 ): Promise<RawResponse> {
   return new Promise((resolve, reject) => {
     const timer = new ExchangeTimer();
     const extraHeaders = route.options.headers as Record<string, string> | undefined;
     const headers = { host: request.url.host, ...toNodeHeaders(request.headers), ...extraHeaders };
+    log.noteSentHeaders(toHeaderList(headers));
     const options = { ...route.options, method: request.method, headers, agent: false, signal };
     const outgoing =
       typeof route.target === "string"
@@ -79,18 +93,43 @@ function exchange(
     outgoing.on("socket", (socket) => {
       keepSocketErrorsHandled(socket);
       timer.watchSocket(socket);
+      log.watchSocket(socket, "server");
+    });
+    outgoing.on("finish", () => {
+      log.add("Request sent; waiting for the response");
     });
     outgoing.on("response", (response) => {
-      timer.markFirstByte();
-      readResponseBody(response, maxResponseBytes)
-        .then((body) => {
-          resolve(toRawResponse(response, body, timer));
-        })
-        .catch(reject);
+      receive(response, { timer, log, maxResponseBytes }).then(resolve, reject);
     });
     outgoing.on("error", reject);
     outgoing.end(request.body);
   });
+}
+
+async function receive(
+  response: IncomingMessage,
+  {
+    timer,
+    log,
+    maxResponseBytes,
+  }: { timer: ExchangeTimer; log: NetworkLog; maxResponseBytes?: number | undefined },
+): Promise<RawResponse> {
+  timer.markFirstByte();
+  log.add(
+    `Response: HTTP/${response.httpVersion} ${String(response.statusCode)} ${response.statusMessage ?? ""}`,
+  );
+  const body = await readResponseBody(response, maxResponseBytes);
+  log.add(`Body received: ${String(body.length)} bytes`);
+  const raw = toRawResponse(response, body, timer);
+  log.recordResponse(raw);
+  return raw;
+}
+
+/** Node's header object back as name/value pairs, for the log. */
+function toHeaderList(headers: Record<string, string | string[]>): HeaderList {
+  return Object.entries(headers).flatMap(([name, value]) =>
+    [value].flat().map((single): [string, string] => [name, single]),
+  );
 }
 
 /** Repeated header names become one array, which Node sends as separate header lines. */

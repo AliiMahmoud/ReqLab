@@ -21,13 +21,27 @@ const BODY_TYPE_LABELS: [BodyType, string][] = [
   ["graphql", "GraphQL"],
 ];
 
-/** Picks the body type and edits it. Switching type keeps text where both types have text. */
+/** An edit of the body; switching type also updates the other types' kept content. */
+export interface BodyChange {
+  body: RequestBody;
+  otherBodies?: RequestBody[];
+}
+
+/**
+ * Picks the body type and edits it. Switching type keeps the old type's content, so switching
+ * back restores it; a type used for the first time starts from the text both types share.
+ */
 export class BodyEditor extends LitElement {
   static override styles = [formStyles, sectionTabsStyles];
-  static override properties = { body: { attribute: false }, onChange: { attribute: false } };
+  static override properties = {
+    body: { attribute: false },
+    otherBodies: { attribute: false },
+    onChange: { attribute: false },
+  };
 
   declare body: RequestBody;
-  declare onChange: (body: RequestBody) => void;
+  declare otherBodies: RequestBody[];
+  declare onChange: (change: BodyChange) => void;
 
   constructor() {
     super();
@@ -69,7 +83,7 @@ export class BodyEditor extends LitElement {
           .rows=${body.fields}
           .title=${body.type === "form-data" ? "Form data" : "Form fields (x-www-form-urlencoded)"}
           .onChange=${(fields: typeof body.fields) => {
-            this.onChange({ ...body, fields });
+            this.onChange({ body: { ...body, fields } });
           }}
         ></key-value-table>`;
       case "graphql":
@@ -107,7 +121,7 @@ export class BodyEditor extends LitElement {
 
   private renderTextEditor(body: Extract<RequestBody, { type: "json" | "raw" }>): TemplateResult {
     const changeText = (text: string): void => {
-      this.onChange({ ...body, text });
+      this.onChange({ body: { ...body, text } });
     };
     return html`${body.type === "raw" ? this.renderContentTypePicker(body) : undefined}
       <code-area
@@ -122,7 +136,7 @@ export class BodyEditor extends LitElement {
 
   private renderContentTypePicker(body: Extract<RequestBody, { type: "raw" }>): TemplateResult {
     const choose = (contentType: string): void => {
-      this.onChange({ ...body, contentType });
+      this.onChange({ body: { ...body, contentType } });
     };
     const current = body.contentType.trim() === "" ? "text/plain" : body.contentType;
     return html`<div class="chips">
@@ -144,7 +158,7 @@ export class BodyEditor extends LitElement {
         .wrap=${isEditorWrapped.get()}
         .placeholder=${"query { … }"}
         .onChange=${(query: string) => {
-          this.onChange({ ...body, query });
+          this.onChange({ body: { ...body, query } });
         }}
       ></code-area>
       <p class="chips">Variables (JSON)</p>
@@ -155,14 +169,21 @@ export class BodyEditor extends LitElement {
         .wrap=${isEditorWrapped.get()}
         .placeholder=${"{ }"}
         .onChange=${(variables: string) => {
-          this.onChange({ ...body, variables });
+          this.onChange({ body: { ...body, variables } });
         }}
       ></code-area>
     `;
   }
 
   private switchType(type: BodyType): void {
-    if (type !== this.body.type) this.onChange(convertBody(this.body, type));
+    const current = this.body;
+    if (type === current.type) return;
+    const restored = this.otherBodies.find((other) => other.type === type);
+    const others = this.otherBodies.filter((other) => other.type !== type && other.type !== current.type);
+    this.onChange({
+      body: restored ?? convertBody(current, type),
+      otherBodies: current.type === "none" ? others : [...others, current],
+    });
   }
 }
 

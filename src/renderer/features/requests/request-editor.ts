@@ -1,6 +1,6 @@
 import { css, html, LitElement, type TemplateResult } from "lit";
 import type { RequestAuth } from "@shared/models/auth";
-import type { KeyValue, RequestBody } from "@shared/models/request";
+import type { KeyValue } from "@shared/models/request";
 import "../../components/key-value-table";
 import { formStyles } from "../../components/shared-styles";
 import { findTreeItem } from "../../stores/collection-store";
@@ -9,6 +9,7 @@ import type { EditorSection, RequestTab } from "../../stores/request-tab";
 import { updateDraft, updateTab } from "../../stores/tab-store";
 import "../../components/auth-editor";
 import "./body-editor";
+import type { BodyChange } from "./body-editor";
 import "./inherited-auth-hint";
 import "../../components/scripts-editor";
 import type { Scripts } from "@shared/models/scripts";
@@ -148,8 +149,8 @@ export class RequestEditor extends LitElement {
     const changeHeaders = (headers: KeyValue[]): void => {
       updateDraft(id, { headers });
     };
-    const changeBody = (body: RequestBody): void => {
-      updateDraft(id, { body });
+    const changeBody = (change: BodyChange): void => {
+      updateDraft(id, change);
     };
     if (section === "params") return this.renderParams(changeParams);
     if (section === "headers") {
@@ -159,7 +160,11 @@ export class RequestEditor extends LitElement {
         .onChange=${changeHeaders}
       ></key-value-table>`;
     }
-    return html`<body-editor .body=${draft.body} .onChange=${changeBody}></body-editor>`;
+    return html`<body-editor
+      .body=${draft.body}
+      .otherBodies=${draft.otherBodies ?? []}
+      .onChange=${changeBody}
+    ></body-editor>`;
   }
 }
 

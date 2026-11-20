@@ -1,7 +1,10 @@
 import type { ResponseView, SendRequestInput } from "@shared/models/http-exchange";
+import type { NetworkLogView } from "@shared/models/network-log";
 import type { RequestDefinition } from "@shared/models/request";
 import type { FinalResponse, PreparedRequest } from "../http/http-types";
 import { toCurl } from "../http/to-curl";
+import { NetworkLog } from "../http/network-log";
+import { RecentNetworkLogs } from "./recent-network-logs";
 import type { OAuth2Service } from "../auth/oauth2/oauth2-service";
 import type { NetworkSettingsStore } from "../network/network-settings-store";
 import type { RequestSettingsStore } from "../network/request-settings-store";
@@ -37,6 +40,7 @@ interface SenderServices {
 /** Sends requests through the pipeline and lets the UI cancel them by id. */
 export class RequestSender {
   readonly #inFlight = new Map<string, AbortController>();
+  readonly #logs = new RecentNetworkLogs();
   readonly #pipeline: RequestPipeline;
   /** The same steps up to the network: what "Copy as cURL" runs. */
   readonly #preparation: RequestPipeline;
@@ -82,6 +86,7 @@ export class RequestSender {
       sentAt: new Date().toISOString(),
       definition: input.definition,
       warnings: [],
+      log: new NetworkLog(),
     };
     await this.#preparation.run(context);
     const curl = toCurl(context.prepared as PreparedRequest);
@@ -107,20 +112,36 @@ export class RequestSender {
       definition: input.definition,
       warnings: [],
       depth,
+      log: new NetworkLog(),
     };
     try {
       await this.#pipeline.run(context);
       return this.buildView(context);
     } catch (error) {
       this.recordFailure(context);
+      if (error instanceof Error) context.log.fail(error.message);
       throw maskError(error, context);
     } finally {
       this.#inFlight.delete(input.requestId);
+      this.rememberLog(context);
     }
   }
 
   cancel(requestId: string): void {
     this.#inFlight.get(requestId)?.abort();
+  }
+
+  /** The masked network log of a recent send, for the Log button; null once forgotten. */
+  getLog(requestId: string): NetworkLogView | null {
+    return this.#logs.get(requestId);
+  }
+
+  private rememberLog(context: RequestContext): void {
+    const masker = context.scopes?.masker;
+    this.#logs.remember(
+      context.input.requestId,
+      context.log.toView((text) => masker?.mask(text) ?? text),
+    );
   }
 
   private buildView(context: RequestContext): ResponseView {

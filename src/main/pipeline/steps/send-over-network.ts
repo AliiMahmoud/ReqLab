@@ -25,15 +25,29 @@ async function sendWith(
   settings: { network: NetworkPlan; maxResponseBytes: number; followRedirects: boolean },
 ): Promise<void> {
   const prepared = requireValue(context.prepared, "sendOverNetwork");
-  const options: RedirectOptions = { signal: context.signal, ...settings };
+  const options: RedirectOptions = { signal: context.signal, ...settings, log: context.log };
   try {
     const first = await sendFollowingRedirects(prepared, options);
     context.response = (await answerDigestOnce(context, prepared, { first, options })) ?? first;
   } catch (error) {
-    if (context.signal.aborted && isUserCancel(context.signal)) throw new RequestCancelled();
-    if (context.signal.aborted) throw timedOut();
-    throw describeNetworkError(error);
+    if (context.signal.aborted && isUserCancel(context.signal)) {
+      context.log.fail("Cancelled by the user.");
+      throw new RequestCancelled();
+    }
+    const failure = context.signal.aborted ? timedOut() : describeNetworkError(error);
+    context.log.fail(failure.message, describeCause(error));
+    throw await withRoute(failure, settings.network, prepared.url);
   }
+}
+
+/** Says which way a failed request went, so a proxy problem shows: "… (through proxy x:8080)". */
+async function withRoute(failure: Error, network: NetworkPlan, url: URL): Promise<Error> {
+  if (!(failure instanceof RequestFailed)) return failure;
+  const route = await network.proxyFor(url).then(
+    (proxy) => (proxy === undefined ? "sent directly, no proxy" : `through proxy ${proxy.url.host}`),
+    () => undefined,
+  );
+  return route === undefined ? failure : new RequestFailed(`${failure.message} (${route})`);
 }
 
 /** Digest auth: a 401 with a Digest challenge is answered once; any other response stands. */
@@ -69,8 +83,15 @@ function isUserCancel(signal: AbortSignal): boolean {
   return !(signal.reason instanceof DOMException && signal.reason.name === "TimeoutError");
 }
 
-function timedOut(): Error {
+function timedOut(): RequestFailed {
   return new RequestFailed(
     "No response within the request timeout (Settings › General › Request; 0 = no timeout).",
   );
+}
+
+/** Node's own error code and text (e.g. "ETIMEDOUT: connect ETIMEDOUT 10.0.0.1:8080"), for the log. */
+function describeCause(error: unknown): string | undefined {
+  if (!(error instanceof Error) || error instanceof RequestFailed) return undefined;
+  const code = (error as NodeJS.ErrnoException).code;
+  return `${code ?? error.name}: ${error.message}`;
 }

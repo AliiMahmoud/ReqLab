@@ -1,3 +1,4 @@
+import { describeSystemProxy } from "../network/system-proxy";
 import type { IpcRouter } from "./ipc-router";
 import type { IpcServices } from "./ipc-services";
 
@@ -18,4 +19,5 @@ export function registerNetworkHandlers(
   router.handle("network:remove-certificate", ({ workspaceId, id }) =>
     networkSettings.removeCertificate(workspaceId, id),
   );
+  router.handle("network:describe-system-proxy", () => describeSystemProxy());
 }

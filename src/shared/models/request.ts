@@ -49,6 +49,8 @@ export const RequestDefinition = z.object({
   params: KeyValueList,
   headers: KeyValueList,
   body: RequestBody,
+  /** The other body types' content, so switching type and back restores it. Never sent. */
+  otherBodies: z.array(RequestBody).max(BodyTypes.length).optional(),
   /** Requests saved before auth existed have none stored: they inherit. */
   auth: RequestAuth.default({ type: "inherit" }),
   /** Values for ":name" segments of the URL path (Postman's path variables). */

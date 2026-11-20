@@ -87,9 +87,11 @@ export class NetworkSettingsPanel extends LitElement {
       }
     `,
   ];
-  static override properties = { workspaceId: { attribute: false } };
+  static override properties = { workspaceId: { attribute: false }, systemProxy: { state: true } };
 
   declare workspaceId: string;
+  /** What "System proxy" finds on this computer, looked up when the panel opens. */
+  declare systemProxy: string | undefined;
 
   constructor() {
     super();
@@ -99,6 +101,9 @@ export class NetworkSettingsPanel extends LitElement {
   override connectedCallback(): void {
     super.connectedCallback();
     void loadNetworkSettings(this.workspaceId);
+    void callApi(api.describeSystemProxy()).then((found) => {
+      this.systemProxy = found;
+    });
   }
 
   override render(): TemplateResult | undefined {
@@ -118,7 +123,7 @@ export class NetworkSettingsPanel extends LitElement {
           })}
           ${settings.verifyTls ? undefined : html`<p class="warning">⚠ Off: the server's identity is not checked. Use only for local or test servers.</p>`}
         </section>
-        ${renderProxySection(settings.proxy, this.chooseProxyMode)}
+        ${renderProxySection(settings.proxy, this.systemProxy, this.chooseProxyMode)}
       </form>
       ${this.renderCaCertificates(settings)} ${this.renderClientCertificates(settings)}`;
   }

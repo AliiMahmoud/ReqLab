@@ -18,6 +18,7 @@ import { responseStyles } from "./response-styles";
 import "./response-body";
 import "./timing-chart";
 import "./script-results";
+import "./network-log-dialog";
 
 /** The response of the active tab: status, body (pretty / raw / preview), headers and timing. */
 export class ResponsePanel extends LitElement {
@@ -66,12 +67,25 @@ export class ResponsePanel extends LitElement {
       ${isResponseCollapsed.get() ? undefined : message}`;
   }
 
+  /** The send's network log (JSON): the request as sent, proxy, TLS, the response or the error. */
+  private renderLogButton(label = "Show log"): TemplateResult | undefined {
+    const requestId = this.tab.lastRequestId;
+    if (requestId === undefined) return undefined;
+    const open = (): void => {
+      void this.renderRoot.querySelector("network-log-dialog")?.open(requestId);
+    };
+    return html`<button title="The request as sent, the proxy, TLS and the response, as JSON" @click=${open}>
+        ${label}</button
+      ><network-log-dialog></network-log-dialog>`;
+  }
+
   private renderMessage(text: string, isError = false): TemplateResult {
     const message = html`<div
       class="message ${isError ? "is-error" : ""}"
       role=${isError ? "alert" : "status"}
     >
       ${isError ? logoIcon(40) : undefined}<span>${text}</span>
+      ${isError ? this.renderLogButton() : undefined}
     </div>`;
     return html`<div class="status-line">
         ${renderTitle(this.tab)}<span class="spacer"></span>${renderClose()}
@@ -93,6 +107,7 @@ export class ResponsePanel extends LitElement {
       <div class="section-tabs" role="tablist" aria-label="Timing">
         ${this.renderSectionTab("timing", "Timing")}
       </div>
+      <div class="section-tabs">${this.renderLogButton("Log")}</div>
       ${renderClose()}
     </div>`;
   }
