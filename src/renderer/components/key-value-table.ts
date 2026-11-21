@@ -12,6 +12,7 @@ import {
   variableFieldStyles,
   variableOverlay,
 } from "./variable-highlight";
+import { appSettings } from "../stores/app-settings-store";
 import { knownVariableNames } from "../stores/environment-store";
 import { watch } from "../controllers/signal-watcher";
 
@@ -28,6 +29,7 @@ export class KeyValueTable extends LitElement {
     keyLabel: { attribute: false },
     title: { attribute: false },
     onChange: { attribute: false },
+    allowsNewLines: { attribute: false },
     bulkText: { state: true },
   };
 
@@ -35,6 +37,8 @@ export class KeyValueTable extends LitElement {
   declare keyLabel: string;
   declare title: string;
   declare onChange: (rows: KeyValue[]) => void;
+  /** Body form tables: values may span lines when Settings › New lines in form values is on. */
+  declare allowsNewLines: boolean;
   /** The bulk-edit text as typed; undefined while editing as a table. */
   declare bulkText: string | undefined;
 
@@ -44,8 +48,9 @@ export class KeyValueTable extends LitElement {
     this.keyLabel = "Key";
     this.title = "";
     this.onChange = () => undefined;
+    this.allowsNewLines = false;
     this.bulkText = undefined;
-    watch(this, knownVariableNames);
+    watch(this, knownVariableNames, appSettings);
   }
 
   override render(): TemplateResult {
@@ -115,6 +120,9 @@ export class KeyValueTable extends LitElement {
     };
     const value = row[field] ?? "";
     const highlights = field !== "description";
+    if (this.spansLines(field)) {
+      return renderLinesCell({ value, label: labels[field], isBlank: index === this.rows.length }, update);
+    }
     return html`<span class="variable-field"
       ><input
         class="cell ${highlights && hasVariables(value) ? "has-variables" : ""}"
@@ -129,6 +137,11 @@ export class KeyValueTable extends LitElement {
         @select=${syncVariableOverlay}
       />${highlights ? variableOverlay(value) : undefined}</span
     >`;
+  }
+
+  /** Values of body form tables, when Settings › New lines in form values is on. */
+  private spansLines(field: Field): boolean {
+    return field === "value" && this.allowsNewLines && appSettings.get().multilineValues;
   }
 
   private renderBulk(text: string): TemplateResult {
@@ -154,6 +167,25 @@ export class KeyValueTable extends LitElement {
   private readonly toggleBulk = (): void => {
     this.bulkText = this.bulkText === undefined ? toBulkText(this.rows) : undefined;
   };
+}
+
+/** A value that may span lines: a text box that grows with its content; Enter adds a line. */
+function renderLinesCell(
+  cell: { value: string; label: string; isBlank: boolean },
+  update: (event: Event) => void,
+): TemplateResult {
+  return html`<span class="variable-field is-multiline">
+    <textarea
+      class="cell ${hasVariables(cell.value) ? "has-variables" : ""}"
+      rows="1"
+      aria-label=${cell.label}
+      placeholder=${cell.isBlank ? cell.label : ""}
+      spellcheck="false"
+      .value=${cell.value}
+      @input=${update}
+    ></textarea
+    >${variableOverlay(cell.value)}</span
+  >`;
 }
 
 customElements.define("key-value-table", KeyValueTable);

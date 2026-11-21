@@ -29,7 +29,7 @@ export const dialogStyles = css`
     border: 1px solid var(--color-border-soft);
     border-radius: var(--radius);
     font-family: var(--font-code);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
     color: var(--color-text-soft);
     max-height: 120px;
     overflow-y: auto;
@@ -46,7 +46,7 @@ export const dialogStyles = css`
   }
   .count strong {
     display: block;
-    font-size: 18px;
+    font-size: calc(18px * var(--text-scale));
   }
   .warnings {
     margin: 0;
@@ -54,7 +54,7 @@ export const dialogStyles = css`
     max-height: 180px;
     overflow-y: auto;
     color: var(--color-warning);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
     line-height: 1.6;
   }
   .checkbox {

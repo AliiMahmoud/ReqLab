@@ -10,7 +10,7 @@ export const saveRequestDialogStyles = css`
   }
   header {
     padding: 16px 20px 0;
-    font-size: 11px;
+    font-size: calc(11px * var(--text-scale));
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -26,7 +26,7 @@ export const saveRequestDialogStyles = css`
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
     color: var(--color-text-muted);
   }
   .crumb {
@@ -34,7 +34,7 @@ export const saveRequestDialogStyles = css`
     border: none;
     background: transparent;
     color: var(--color-link);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
   }
   .crumb:last-child {
     color: var(--color-text);
@@ -80,7 +80,7 @@ export const saveRequestDialogStyles = css`
     border-radius: 6px;
     background: transparent;
     color: var(--color-text);
-    font-size: 12.5px;
+    font-size: calc(12.5px * var(--text-scale));
     text-align: left;
   }
   li > button:hover {
@@ -95,7 +95,7 @@ export const saveRequestDialogStyles = css`
   }
   .path {
     color: var(--color-text-faint);
-    font-size: 11.5px;
+    font-size: calc(11.5px * var(--text-scale));
   }
   .kind-icon {
     display: grid;
@@ -108,7 +108,7 @@ export const saveRequestDialogStyles = css`
   .collection .kind-icon {
     background: var(--color-selected);
     color: var(--color-accent);
-    font-size: 11px;
+    font-size: calc(11px * var(--text-scale));
     font-weight: 700;
   }
   .chevron {
@@ -120,13 +120,13 @@ export const saveRequestDialogStyles = css`
   .method {
     width: 44px;
     font-family: var(--font-code);
-    font-size: 10.5px;
+    font-size: calc(10.5px * var(--text-scale));
     font-weight: 600;
   }
   .empty {
     padding: 28px 12px;
     color: var(--color-text-faint);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
     text-align: center;
   }
   li.new input {
@@ -147,7 +147,7 @@ export const saveRequestDialogStyles = css`
     border: none;
     background: transparent;
     color: var(--color-link);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
   }
   .primary {
     max-width: 260px;

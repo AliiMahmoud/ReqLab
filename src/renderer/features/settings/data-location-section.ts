@@ -19,7 +19,7 @@ export class DataLocationSection extends LitElement {
     css`
       .path {
         font-family: var(--font-code);
-        font-size: 12px;
+        font-size: calc(12px * var(--text-scale));
         word-break: break-all;
       }
       .buttons {
@@ -30,7 +30,7 @@ export class DataLocationSection extends LitElement {
       .error {
         margin: 6px 0 0;
         color: var(--color-warning);
-        font-size: 12px;
+        font-size: calc(12px * var(--text-scale));
       }
     `,
   ];

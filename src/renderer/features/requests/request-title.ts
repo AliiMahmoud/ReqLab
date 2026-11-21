@@ -40,7 +40,7 @@ export class RequestTitle extends LitElement {
         margin-left: -6px;
         border: 1px solid transparent;
         background: transparent;
-        font-size: 14px;
+        font-size: calc(14px * var(--text-scale));
         font-weight: 600;
         text-align: start;
         cursor: text;
@@ -50,7 +50,7 @@ export class RequestTitle extends LitElement {
         border-color: var(--color-field-border);
       }
       input.rename {
-        font-size: 14px;
+        font-size: calc(14px * var(--text-scale));
         font-weight: 600;
         padding: 3px 6px;
         flex: 1;
@@ -58,7 +58,7 @@ export class RequestTitle extends LitElement {
       }
       .draft {
         color: var(--color-text-faint);
-        font-size: 12px;
+        font-size: calc(12px * var(--text-scale));
       }
       .spacer {
         flex: 1;

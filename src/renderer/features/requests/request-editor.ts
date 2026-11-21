@@ -29,7 +29,7 @@ export class RequestEditor extends LitElement {
         border: none;
         background: transparent;
         color: var(--color-link);
-        font-size: 12px;
+        font-size: calc(12px * var(--text-scale));
       }
       :host {
         display: flex;

@@ -29,7 +29,7 @@ export const sectionTabsStyles = css`
   }
   .count {
     color: var(--color-text-faint);
-    font-size: 11px;
+    font-size: calc(11px * var(--text-scale));
     margin-left: var(--space-1);
   }
   /* "This section is set": a small green dot after the label, as in Postman. */
@@ -49,7 +49,7 @@ export const sectionTabsStyles = css`
     align-items: center;
     padding: 10px var(--space-3);
     color: var(--color-text-muted);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
     flex-wrap: wrap;
   }
   .chips button {
@@ -58,7 +58,7 @@ export const sectionTabsStyles = css`
     border-radius: var(--radius-small);
     background: transparent;
     color: var(--color-text-muted);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
   }
   .chips button[aria-pressed="true"] {
     background: var(--color-selected);

@@ -53,7 +53,7 @@ export class ScriptsEditor extends LitElement {
       background: transparent;
       color: var(--color-text-muted);
       font: inherit;
-      font-size: 12.5px;
+      font-size: calc(12.5px * var(--text-scale));
       font-weight: 500;
       line-height: 1;
       cursor: pointer;

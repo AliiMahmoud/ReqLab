@@ -7,8 +7,8 @@ const PARSE_BUDGET_MS = 3_000;
 
 /**
  * Collapse all: reads the whole document first (a large response is otherwise only partly parsed, so
- * only its top got folded), then folds every block below the outermost one, which stays open so the
- * first level is still visible.
+ * only its top got folded), then folds every block at every depth below the outermost one, which
+ * stays open so the first level is still visible. Unfolding a block shows its children folded too.
  */
 export function foldEverythingInside(view: EditorView): void {
   ensureSyntaxTree(view.state, view.state.doc.length, PARSE_BUDGET_MS);
@@ -18,12 +18,10 @@ export function foldEverythingInside(view: EditorView): void {
   const effects: StateEffect<unknown>[] = [];
   const firstLine = state.doc.line(1);
   const root = foldable(state, firstLine.from, firstLine.to);
-  let position = root === null ? 0 : firstLine.to + 1;
-  while (position < state.doc.length) {
-    const line = state.doc.lineAt(position);
+  for (let number = root === null ? 1 : 2; number <= state.doc.lines; number += 1) {
+    const line = state.doc.line(number);
     const range = foldable(state, line.from, line.to);
     if (range !== null) effects.push(foldEffect.of(range));
-    position = (range === null ? line : state.doc.lineAt(range.to)).to + 1;
   }
   if (effects.length > 0) view.dispatch({ effects });
 }

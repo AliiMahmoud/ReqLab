@@ -40,7 +40,7 @@ export class ResponseImage extends LitElement {
     }
     .caption {
       color: var(--color-text-faint);
-      font-size: 12px;
+      font-size: calc(12px * var(--text-scale));
       font-variant-numeric: tabular-nums;
     }
   `;

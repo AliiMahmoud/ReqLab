@@ -21,11 +21,11 @@ export class HistoryList extends LitElement {
     css`
       .url {
         font-family: var(--font-code);
-        font-size: 11.5px;
+        font-size: calc(11.5px * var(--text-scale));
       }
       .meta {
         font-family: var(--font-code);
-        font-size: 10.5px;
+        font-size: calc(10.5px * var(--text-scale));
         color: var(--color-text-faint);
         flex: none;
       }
@@ -41,11 +41,11 @@ export class HistoryList extends LitElement {
         align-items: center;
         padding: 0 var(--space-2) var(--space-2);
         color: var(--color-text-faint);
-        font-size: 11px;
+        font-size: calc(11px * var(--text-scale));
       }
       .toolbar button {
         padding: 2px 8px;
-        font-size: 11px;
+        font-size: calc(11px * var(--text-scale));
       }
     `,
   ];

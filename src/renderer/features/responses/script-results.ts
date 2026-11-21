@@ -18,12 +18,12 @@ export class ScriptResults extends LitElement {
       min-height: 0;
       overflow: auto;
       padding: var(--space-3) var(--space-4);
-      font-size: 12.5px;
+      font-size: calc(12.5px * var(--text-scale));
     }
     h3 {
       margin: 14px 0 6px;
       color: var(--color-text-muted);
-      font-size: 11px;
+      font-size: calc(11px * var(--text-scale));
       font-weight: 600;
       letter-spacing: 0.06em;
       text-transform: uppercase;
@@ -48,7 +48,7 @@ export class ScriptResults extends LitElement {
       justify-self: start;
       padding: 1px 8px;
       border-radius: 999px;
-      font-size: 11px;
+      font-size: calc(11px * var(--text-scale));
       font-weight: 600;
     }
     .pass {

@@ -10,7 +10,7 @@ export class InheritedAuthHint extends LitElement {
     p {
       margin: 0;
       color: var(--color-text-muted);
-      font-size: 12.5px;
+      font-size: calc(12.5px * var(--text-scale));
       line-height: 1.6;
     }
     button {

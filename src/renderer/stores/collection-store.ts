@@ -79,6 +79,22 @@ export function toggleCollapsed(id: string): void {
   if (collapsedOwner !== undefined) saveCollapsed(collapsedOwner, next);
 }
 
+/** Opens the folders and the collection around an item, so its row shows in the tree. */
+export function expandParentsOf(itemId: string): void {
+  const item = findTreeItem(itemId);
+  if (item === undefined) return;
+  const next = new Set(collapsedIds.get());
+  let parentId = item.parentId;
+  while (parentId !== null) {
+    next.delete(parentId);
+    parentId = findTreeItem(parentId)?.parentId ?? null;
+  }
+  next.delete(item.collectionId);
+  if (next.size === collapsedIds.get().size) return;
+  collapsedIds.set(next);
+  if (collapsedOwner !== undefined) saveCollapsed(collapsedOwner, next);
+}
+
 export function findTreeItem(itemId: string | null): TreeItem | undefined {
   return collectionTree.get().items.find((item) => item.id === itemId);
 }

@@ -55,7 +55,7 @@ export class AuthEditor extends LitElement {
         gap: var(--space-3);
         align-items: center;
         color: var(--color-text-muted);
-        font-size: 12px;
+        font-size: calc(12px * var(--text-scale));
       }
       .field .variable-field input {
         width: 100%;
@@ -65,7 +65,7 @@ export class AuthEditor extends LitElement {
       }
       .empty {
         color: var(--color-text-faint);
-        font-size: 12px;
+        font-size: calc(12px * var(--text-scale));
         margin: var(--space-2) 0;
       }
       @container (max-width: 560px) {

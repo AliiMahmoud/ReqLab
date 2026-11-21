@@ -21,7 +21,7 @@ export class RequestInfo extends LitElement {
         border: none;
         background: transparent;
         color: var(--color-text-faint);
-        font-size: 11.5px;
+        font-size: calc(11.5px * var(--text-scale));
       }
       button:hover:not(:disabled) {
         background: var(--color-hover-tint);

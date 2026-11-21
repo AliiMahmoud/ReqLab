@@ -11,7 +11,7 @@ export class TimingChart extends LitElement {
       gap: var(--space-2);
       padding: var(--space-4);
       font-family: var(--font-code);
-      font-size: 12px;
+      font-size: calc(12px * var(--text-scale));
     }
     .phase {
       display: grid;

@@ -101,7 +101,7 @@ export class WorkspaceSidebar extends LitElement {
         border: none;
         background: transparent;
         color: var(--color-text-muted);
-        font-size: 12px;
+        font-size: calc(12px * var(--text-scale));
       }
       .modes button[aria-pressed="true"] {
         background: var(--color-selected);

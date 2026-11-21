@@ -15,7 +15,7 @@ export const themePickerStyles = css`
   .themes h3 {
     margin: 4px 0 0;
     color: var(--color-text-muted);
-    font-size: 11px;
+    font-size: calc(11px * var(--text-scale));
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -45,7 +45,7 @@ export const themePickerStyles = css`
     align-items: center;
     justify-content: space-between;
     padding: 0 2px;
-    font-size: 12.5px;
+    font-size: calc(12.5px * var(--text-scale));
     color: var(--color-text);
   }
   .card .label svg {

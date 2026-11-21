@@ -19,7 +19,7 @@ export const containerSettingsStyles = css`
     color: var(--color-text-muted);
   }
   header strong {
-    font-size: 15px;
+    font-size: calc(15px * var(--text-scale));
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -27,7 +27,7 @@ export const containerSettingsStyles = css`
   header .status {
     margin-left: auto;
     color: var(--color-text-faint);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
   }
   [role="tablist"] {
     display: flex;
@@ -61,7 +61,7 @@ export const containerSettingsStyles = css`
   .hint {
     margin: 0;
     color: var(--color-text-muted);
-    font-size: 12.5px;
+    font-size: calc(12.5px * var(--text-scale));
   }
   scripts-editor {
     flex: 1;

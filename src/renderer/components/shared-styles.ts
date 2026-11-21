@@ -18,12 +18,12 @@ export const formStyles = css`
     display: grid;
     gap: var(--space-1);
     color: var(--color-text-muted);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
   }
   input,
   textarea {
     font: inherit;
-    font-size: 12.5px;
+    font-size: calc(12.5px * var(--text-scale));
     padding: 7px 10px;
     border: 1px solid var(--color-field-border);
     border-radius: var(--radius);
@@ -44,7 +44,7 @@ export const formStyles = css`
   }
   button {
     font: inherit;
-    font-size: 12.5px;
+    font-size: calc(12.5px * var(--text-scale));
     padding: 7px 14px;
     border: 1px solid var(--color-field-border);
     border-radius: var(--radius);
@@ -102,7 +102,7 @@ export const formStyles = css`
   }
   .hint {
     color: var(--color-text-faint);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
   }
   .mono {
     font-family: var(--font-code);

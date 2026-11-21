@@ -5,7 +5,7 @@ export const treeStyles = css`
   :host {
     display: block;
     padding: var(--space-1) var(--space-2);
-    font-size: 13.5px;
+    font-size: calc(13.5px * var(--text-scale));
     overflow-y: auto;
   }
   .row {
@@ -13,7 +13,7 @@ export const treeStyles = css`
     display: flex;
     align-items: center;
     gap: 6px;
-    min-height: 34px;
+    min-height: var(--row-height);
     padding: 0 var(--space-2);
     border-radius: var(--radius);
     color: var(--color-text-soft);
@@ -80,7 +80,7 @@ export const treeStyles = css`
   .method {
     font-family: var(--font-ui);
     font-variant-numeric: tabular-nums;
-    font-size: 10.5px;
+    font-size: calc(10.5px * var(--text-scale));
     font-weight: 600;
     /* As wide as the method itself: the name follows right after it. */
     flex: none;
@@ -103,7 +103,7 @@ export const treeStyles = css`
     border: none;
     background: transparent;
     color: var(--color-text-faint);
-    font-size: 11px;
+    font-size: calc(11px * var(--text-scale));
   }
   .actions button {
     border-radius: 5px;
@@ -115,7 +115,7 @@ export const treeStyles = css`
   input.rename {
     flex: 1;
     padding: 2px 6px;
-    font-size: 13.5px;
+    font-size: calc(13.5px * var(--text-scale));
   }
   .empty {
     padding: var(--space-3);

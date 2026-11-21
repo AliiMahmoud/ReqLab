@@ -33,6 +33,7 @@ import "../../components/context-menu";
 import { TreeRowMenus } from "./tree-menu";
 import { confirmTreeDelete, indent, renderMethodBadge, dragItem, type ContainerRow } from "./tree-rows";
 import { openContainerSettings } from "../containers/open-container-settings";
+import { TreeRevealController } from "./tree-reveal";
 import { rowButtonStyles, treeStyles } from "./tree-styles";
 
 /** Set by the sidebar's "New collection" so the new row opens in rename mode. */
@@ -62,6 +63,8 @@ export class CollectionTree extends LitElement {
   constructor() {
     super();
     installTreeKeys(this, () => this.workspaceId);
+    // Registers itself with the tree: the open request's row is shown and scrolled to.
+    new TreeRevealController(this);
     watch(this, collectionTree, collapsedIds, treeSearch, renamingId, activeTabId, treeSelection);
   }
 

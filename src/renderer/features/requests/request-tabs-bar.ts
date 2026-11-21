@@ -118,7 +118,7 @@ export class RequestTabsBar extends LitElement {
       .method {
         font-family: var(--font-ui);
         font-variant-numeric: tabular-nums;
-        font-size: 10.5px;
+        font-size: calc(10.5px * var(--text-scale));
       }
       .dirty {
         width: 6px;

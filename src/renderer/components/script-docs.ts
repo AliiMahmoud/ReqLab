@@ -47,7 +47,7 @@ export class ScriptDocs extends LitElement {
         border-bottom: 1px solid var(--color-border);
       }
       header strong {
-        font-size: 15px;
+        font-size: calc(15px * var(--text-scale));
       }
       .close {
         width: 28px;
@@ -60,12 +60,12 @@ export class ScriptDocs extends LitElement {
         outline: none;
         overflow: auto;
         padding: 4px 20px 20px;
-        font-size: 12.5px;
+        font-size: calc(12.5px * var(--text-scale));
         line-height: 1.6;
       }
       h3 {
         margin: 18px 0 6px;
-        font-size: 11px;
+        font-size: calc(11px * var(--text-scale));
         font-weight: 600;
         letter-spacing: 0.06em;
         text-transform: uppercase;
@@ -88,7 +88,7 @@ export class ScriptDocs extends LitElement {
       code,
       pre {
         font-family: var(--font-code);
-        font-size: 12px;
+        font-size: calc(12px * var(--text-scale));
       }
       dt code {
         color: var(--syntax-key);

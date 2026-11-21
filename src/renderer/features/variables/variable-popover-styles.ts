@@ -11,7 +11,7 @@ export const variablePopoverStyles = css`
     background: var(--color-surface-raised, var(--color-surface));
     color: var(--color-text);
     box-shadow: var(--shadow-popup);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
     overflow: hidden;
   }
   ul {

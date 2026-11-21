@@ -29,7 +29,7 @@ export class CookiesDialog extends LitElement {
         padding: 6px 8px;
         border-bottom: 1px solid var(--color-border-soft);
         font-family: var(--font-code);
-        font-size: 12px;
+        font-size: calc(12px * var(--text-scale));
       }
       .value {
         overflow: hidden;
@@ -39,7 +39,7 @@ export class CookiesDialog extends LitElement {
       }
       .meta {
         color: var(--color-text-faint);
-        font-size: 11px;
+        font-size: calc(11px * var(--text-scale));
         white-space: nowrap;
       }
       .list {

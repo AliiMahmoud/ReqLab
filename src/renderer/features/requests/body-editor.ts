@@ -81,6 +81,7 @@ export class BodyEditor extends LitElement {
       case "form-data":
         return html`<key-value-table
           .rows=${body.fields}
+          .allowsNewLines=${true}
           .title=${body.type === "form-data" ? "Form data" : "Form fields (x-www-form-urlencoded)"}
           .onChange=${(fields: typeof body.fields) => {
             this.onChange({ body: { ...body, fields } });

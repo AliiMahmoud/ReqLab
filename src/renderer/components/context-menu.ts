@@ -27,7 +27,7 @@ export class ContextMenu extends LitElement {
       background: var(--color-raised);
       color: var(--color-text);
       box-shadow: var(--shadow-popup);
-      font-size: 12.5px;
+      font-size: calc(12.5px * var(--text-scale));
     }
     button {
       display: flex;

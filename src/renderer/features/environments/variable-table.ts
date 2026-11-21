@@ -30,13 +30,13 @@ export class VariableTable extends LitElement {
         padding: 10px 12px;
         border-bottom-color: var(--color-border);
         color: var(--color-text-faint);
-        font-size: 11px;
+        font-size: calc(11px * var(--text-scale));
         text-transform: uppercase;
         letter-spacing: 0.06em;
       }
       input:not([type="checkbox"]) {
         font-family: var(--font-code);
-        font-size: 12.5px;
+        font-size: calc(12.5px * var(--text-scale));
         padding: 5px 8px;
         min-width: 0;
         background: transparent;

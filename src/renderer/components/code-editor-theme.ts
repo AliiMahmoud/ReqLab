@@ -7,7 +7,7 @@ export const codeEditorTheme = EditorView.theme(
   {
     "&": {
       height: "100%",
-      fontSize: "12.5px",
+      fontSize: "calc(12.5px * var(--text-scale))",
       color: "var(--color-text-soft)",
       backgroundColor: "transparent",
     },
@@ -71,7 +71,11 @@ export const codeEditorTheme = EditorView.theme(
       fontFamily: "var(--font-ui)",
     },
     ".cm-request-title": { display: "flex", alignItems: "baseline", gap: "8px", minWidth: "0" },
-    ".cm-request-method": { fontSize: "11px", fontWeight: "700", letterSpacing: "0.02em" },
+    ".cm-request-method": {
+      fontSize: "calc(11px * var(--text-scale))",
+      fontWeight: "700",
+      letterSpacing: "0.02em",
+    },
     // Long names and paths end in "…" instead of widening the list.
     ".cm-request-name": {
       overflow: "hidden",
@@ -79,7 +83,7 @@ export const codeEditorTheme = EditorView.theme(
       whiteSpace: "nowrap",
     },
     ".cm-request-path": {
-      fontSize: "11px",
+      fontSize: "calc(11px * var(--text-scale))",
       color: "var(--color-text-faint)",
       overflow: "hidden",
       textOverflow: "ellipsis",

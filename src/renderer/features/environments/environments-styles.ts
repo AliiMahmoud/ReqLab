@@ -21,7 +21,7 @@ export const environmentsStyles = css`
   }
   .group {
     color: var(--color-text-faint);
-    font-size: 11px;
+    font-size: calc(11px * var(--text-scale));
     text-transform: uppercase;
     letter-spacing: 0.08em;
     padding: var(--space-2) var(--space-2) var(--space-1);
@@ -34,7 +34,7 @@ export const environmentsStyles = css`
     border: none;
     text-align: start;
     background: transparent;
-    font-size: 13px;
+    font-size: calc(13px * var(--text-scale));
   }
   .owner[aria-current="true"] {
     background: var(--color-selected);
@@ -55,7 +55,7 @@ export const environmentsStyles = css`
   }
   .active-mark {
     font-family: var(--font-code);
-    font-size: 10.5px;
+    font-size: calc(10.5px * var(--text-scale));
     color: var(--color-success);
   }
   .new {
@@ -70,7 +70,7 @@ export const environmentsStyles = css`
     margin-top: auto;
     padding: 10px 8px;
     color: var(--color-text-faint);
-    font-size: 11.5px;
+    font-size: calc(11.5px * var(--text-scale));
     line-height: 1.5;
   }
   main {
@@ -93,11 +93,11 @@ export const environmentsStyles = css`
   }
   h1 {
     margin: 0;
-    font-size: 20px;
+    font-size: calc(20px * var(--text-scale));
     font-weight: 600;
   }
   h1 input {
-    font-size: 20px;
+    font-size: calc(20px * var(--text-scale));
     font-weight: 600;
     padding: 2px 6px;
     margin-left: -7px;
@@ -111,7 +111,7 @@ export const environmentsStyles = css`
   }
   .subtitle {
     color: var(--color-text-muted);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
     margin-top: var(--space-1);
     font-family: var(--font-code);
   }
@@ -136,16 +136,16 @@ export const environmentsStyles = css`
   .card p {
     margin: 0;
     color: var(--color-text-muted);
-    font-size: 12.5px;
+    font-size: calc(12.5px * var(--text-scale));
     line-height: 1.6;
   }
   .card input {
     font-family: var(--font-code);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
   }
   .resolved {
     font-family: var(--font-code);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
     color: var(--color-text-faint);
     word-break: break-all;
   }
@@ -154,13 +154,13 @@ export const environmentsStyles = css`
     align-items: center;
     gap: var(--space-2);
     color: var(--color-danger);
-    font-size: 12.5px;
+    font-size: calc(12.5px * var(--text-scale));
     cursor: pointer;
   }
   .save-state {
     min-height: 16px;
     margin: 0;
     color: var(--color-text-faint);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
   }
 `;

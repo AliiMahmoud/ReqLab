@@ -24,7 +24,7 @@ export class OAuth2TokenPanel extends LitElement {
         gap: var(--space-2);
         padding-top: var(--space-2);
         border-top: 1px solid var(--color-border-soft);
-        font-size: 12px;
+        font-size: calc(12px * var(--text-scale));
       }
       .status {
         flex: 1;

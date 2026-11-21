@@ -53,7 +53,7 @@ export const responseStyles = css`
     min-height: 40px;
     border-bottom: 1px solid var(--color-border);
     flex-wrap: wrap;
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
     flex: none;
   }
   .status-line .section-tabs {
@@ -86,7 +86,7 @@ export const responseStyles = css`
     border: none;
     background: transparent;
     font-weight: 600;
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
   }
   .close-panel {
     width: 26px;
@@ -133,7 +133,7 @@ export const responseStyles = css`
     padding: var(--space-2) 14px;
     background: var(--color-warning-background);
     color: var(--color-warning);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
     flex: none;
   }
   .warnings p {
@@ -149,7 +149,7 @@ export const responseStyles = css`
     flex: 1;
     padding: var(--space-3) var(--space-4);
     font-family: var(--font-code);
-    font-size: 12.5px;
+    font-size: calc(12.5px * var(--text-scale));
     line-height: 1.7;
     overflow: auto;
     color: var(--color-text-soft);
@@ -179,7 +179,7 @@ export const responseStyles = css`
     flex-wrap: wrap;
     font-family: var(--font-ui);
     font-variant-numeric: tabular-nums;
-    font-size: 11px;
+    font-size: calc(11px * var(--text-scale));
     color: var(--color-text-faint);
     flex: none;
   }
@@ -220,7 +220,7 @@ export const responseStyles = css`
     border-collapse: collapse;
     width: 100%;
     font-family: var(--font-code);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
   }
   td {
     padding: 6px 14px;

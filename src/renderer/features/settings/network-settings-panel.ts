@@ -45,13 +45,13 @@ export class NetworkSettingsPanel extends LitElement {
       }
       h3 {
         margin: 0;
-        font-size: 13px;
+        font-size: calc(13px * var(--text-scale));
       }
       .entry {
         display: flex;
         align-items: center;
         gap: var(--space-2);
-        font-size: 12px;
+        font-size: calc(12px * var(--text-scale));
       }
       .entry .text {
         flex: 1;
@@ -71,7 +71,7 @@ export class NetworkSettingsPanel extends LitElement {
       }
       .warning {
         color: var(--color-warning);
-        font-size: 12px;
+        font-size: calc(12px * var(--text-scale));
       }
       .remove {
         width: 28px;

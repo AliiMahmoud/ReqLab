@@ -5,7 +5,7 @@ export const settingRowStyles = css`
   .group {
     margin: 18px 0 2px;
     color: var(--color-text-muted);
-    font-size: 11px;
+    font-size: calc(11px * var(--text-scale));
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -17,7 +17,7 @@ export const settingRowStyles = css`
     padding: 0 8px;
     text-align: right;
     font-family: var(--font-code);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
     appearance: textfield;
   }
   input.number::-webkit-inner-spin-button,

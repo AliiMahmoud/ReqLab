@@ -44,7 +44,7 @@ export class EmptyRequestArea extends LitElement {
         border: 1px solid var(--color-border-soft);
       }
       .brand strong {
-        font-size: 18px;
+        font-size: calc(18px * var(--text-scale));
         letter-spacing: 0.01em;
         color: var(--color-text);
       }
@@ -56,7 +56,7 @@ export class EmptyRequestArea extends LitElement {
         margin: 0;
         padding: 0;
         list-style: none;
-        font-size: 12.5px;
+        font-size: calc(12.5px * var(--text-scale));
       }
       li {
         display: flex;
@@ -83,7 +83,7 @@ export class EmptyRequestArea extends LitElement {
         background: var(--color-raised);
         color: var(--color-text-soft);
         font-family: var(--font-code);
-        font-size: 11.5px;
+        font-size: calc(11.5px * var(--text-scale));
         text-align: center;
       }
     `,

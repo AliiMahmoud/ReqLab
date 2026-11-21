@@ -13,7 +13,7 @@ export const keyValueTableStyles = css`
     min-height: 30px;
     margin-bottom: var(--space-1);
     color: var(--color-text-muted);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
   }
   .bar .spacer {
     flex: 1;
@@ -23,7 +23,7 @@ export const keyValueTableStyles = css`
     border: none;
     background: transparent;
     color: var(--color-link);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
   }
   .link:hover:not(:disabled) {
     background: transparent;
@@ -43,7 +43,7 @@ export const keyValueTableStyles = css`
     border-bottom: none;
   }
   .row > * {
-    min-height: 34px;
+    min-height: var(--row-height);
     border-right: 1px solid var(--color-border);
   }
   .row > *:last-child {
@@ -56,9 +56,9 @@ export const keyValueTableStyles = css`
     display: flex;
     align-items: center;
     padding: 0 10px;
-    min-height: 30px;
+    min-height: calc(var(--row-height) - 2px);
     color: var(--color-text-faint);
-    font-size: 11px;
+    font-size: calc(11px * var(--text-scale));
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -77,7 +77,33 @@ export const keyValueTableStyles = css`
     border-radius: 0;
     background: transparent;
     font-family: var(--font-code);
-    font-size: 12.5px;
+    font-size: calc(12.5px * var(--text-scale));
+  }
+  /* A value that may span lines grows with its content (no scroll bar, no resize handle). Its
+     first line sits where a one-line cell's text would, whatever the row height. */
+  .is-multiline {
+    --multiline-padding: max(2px, calc((var(--row-height) - 16px * var(--text-scale)) / 2));
+  }
+  textarea.cell {
+    display: block;
+    min-height: var(--row-height);
+    padding: var(--multiline-padding) 10px;
+    line-height: calc(16px * var(--text-scale));
+    resize: none;
+    field-sizing: content;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .is-multiline .variable-overlay {
+    align-items: flex-start;
+    padding: var(--multiline-padding) 10px;
+    line-height: calc(16px * var(--text-scale));
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .is-multiline .variable-overlay > span {
+    flex: 1;
+    min-width: 0;
   }
   .cell:focus-visible {
     outline: none;
@@ -104,8 +130,8 @@ export const keyValueTableStyles = css`
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
+    width: 26px;
+    height: min(26px, var(--row-height));
     padding: 0;
     border: none;
     border-radius: 0;

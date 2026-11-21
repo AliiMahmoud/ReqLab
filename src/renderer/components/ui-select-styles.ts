@@ -24,7 +24,7 @@ export const uiSelectStyles = css`
     background: var(--color-field);
     color: var(--color-text);
     font: inherit;
-    font-size: 12.5px;
+    font-size: calc(12.5px * var(--text-scale));
     text-align: start;
     cursor: pointer;
   }
@@ -75,7 +75,7 @@ export const uiSelectStyles = css`
     gap: var(--space-2);
     padding: 7px 10px;
     border-radius: var(--radius-small);
-    font-size: 12.5px;
+    font-size: calc(12.5px * var(--text-scale));
     white-space: nowrap;
     cursor: pointer;
   }

@@ -22,11 +22,11 @@ export const entryCardStyles = css`
     align-items: center;
     gap: var(--space-2);
     font-weight: 600;
-    font-size: 15px;
+    font-size: calc(15px * var(--text-scale));
   }
   h1 {
     margin: 0;
-    font-size: 20px;
+    font-size: calc(20px * var(--text-scale));
     font-weight: 600;
   }
   .lead {
@@ -39,7 +39,7 @@ export const entryCardStyles = css`
     align-items: center;
     gap: var(--space-3);
     color: var(--color-text-faint);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
   }
   .divider::before,
   .divider::after {
@@ -57,6 +57,6 @@ export const entryCardStyles = css`
   }
   .links button {
     padding: 4px 10px;
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
   }
 `;

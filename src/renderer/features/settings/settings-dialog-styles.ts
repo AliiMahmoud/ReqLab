@@ -20,9 +20,12 @@ export const settingsDialogStyles = css`
     justify-content: space-between;
     padding: 14px 16px 14px 20px;
     border-bottom: 1px solid var(--color-border-soft);
+    /* The title bar moves the window. */
+    cursor: move;
+    user-select: none;
   }
   header strong {
-    font-size: 14px;
+    font-size: calc(14px * var(--text-scale));
   }
   .close {
     display: grid;
@@ -64,12 +67,12 @@ export const settingsDialogStyles = css`
   }
   h2 {
     margin: 0 0 4px;
-    font-size: 15px;
+    font-size: calc(15px * var(--text-scale));
   }
   .lead {
     margin: 0 0 var(--space-3);
     color: var(--color-text-faint);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
   }
   .setting {
     display: grid;
@@ -81,12 +84,12 @@ export const settingsDialogStyles = css`
   }
   .setting .title {
     font-weight: 600;
-    font-size: 13px;
+    font-size: calc(13px * var(--text-scale));
   }
   .setting .hint {
     margin: 2px 0 0;
     color: var(--color-text-faint);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
   }
   .segmented {
     display: inline-flex;

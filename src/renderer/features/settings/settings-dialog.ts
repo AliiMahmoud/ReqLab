@@ -16,6 +16,7 @@ import { appSettings } from "../../stores/app-settings-store";
 import "./network-settings-panel";
 import { settingsDialogStyles } from "./settings-dialog-styles";
 import { showModal } from "../../components/modal-dialog";
+import { makeDialogMovable } from "../../components/movable-dialog";
 
 type Section = "general" | "theme" | "network";
 
@@ -48,7 +49,10 @@ export class SettingsDialog extends LitElement {
   async open(section: Section = "general"): Promise<void> {
     this.section = section;
     await this.updateComplete;
-    showModal(this.renderRoot.querySelector("dialog"));
+    const dialog = this.renderRoot.querySelector("dialog");
+    const header = dialog?.querySelector("header");
+    if (dialog && header) makeDialogMovable(dialog, header);
+    showModal(dialog);
   }
 
   override render(): TemplateResult {

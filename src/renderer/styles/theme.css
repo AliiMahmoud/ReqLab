@@ -8,6 +8,10 @@
   color-scheme: light;
   --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-code: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* Settings › Theme › Font size: every font size is multiplied by this. */
+  --text-scale: 1;
+  /* Settings › Theme › Line height: rows of the requests tree and of the key / value tables. */
+  --row-height: 28px;
 
   --color-background: #ffffff;
   --color-sunken: #f8f9fb;
@@ -202,7 +206,7 @@ body {
   background: var(--color-background);
   color: var(--color-text);
   font-family: var(--font-ui);
-  font-size: 13px;
+  font-size: calc(13px * var(--text-scale));
 }
 
 reqlab-app {

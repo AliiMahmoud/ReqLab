@@ -16,7 +16,7 @@ export const workspaceSwitcherStyles = css`
     padding: 6px 12px;
     border-color: transparent;
     background: transparent;
-    font-size: 15px;
+    font-size: calc(15px * var(--text-scale));
     font-weight: 600;
   }
   .trigger[aria-expanded="true"],
@@ -52,7 +52,7 @@ export const workspaceSwitcherStyles = css`
   .group {
     padding: var(--space-2) 10px var(--space-1);
     color: var(--color-text-faint);
-    font-size: 11px;
+    font-size: calc(11px * var(--text-scale));
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }

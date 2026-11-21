@@ -30,8 +30,8 @@ export const urlBarStyles = css`
   .url input,
   .highlight {
     font-family: var(--font-code);
-    font-size: 12.5px;
-    line-height: 16px;
+    font-size: calc(12.5px * var(--text-scale));
+    line-height: calc(16px * var(--text-scale));
     padding: 9px 12px;
     white-space: pre;
     letter-spacing: normal;
@@ -82,7 +82,7 @@ export const urlBarStyles = css`
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12.5px;
+    font-size: calc(12.5px * var(--text-scale));
     font-weight: 600;
     letter-spacing: 0.01em;
   }
@@ -93,7 +93,7 @@ export const urlBarStyles = css`
     background: var(--color-warning-background);
     color: var(--color-warning);
     font-family: var(--font-code);
-    font-size: 11px;
+    font-size: calc(11px * var(--text-scale));
     white-space: nowrap;
   }
   button.icon.curl {

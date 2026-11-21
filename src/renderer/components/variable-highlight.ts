@@ -49,11 +49,11 @@ export const variableFieldStyles = css`
     display: block;
     min-width: 0;
   }
-  .variable-field > input.has-variables {
+  .variable-field > .has-variables {
     color: transparent;
     caret-color: var(--color-text);
   }
-  .variable-field > input.has-variables::selection {
+  .variable-field > .has-variables::selection {
     background: var(--syntax-selection);
   }
   .variable-overlay {
@@ -65,7 +65,7 @@ export const variableFieldStyles = css`
     padding: var(--variable-overlay-padding, 0 10px);
     border: var(--variable-overlay-border, 0px) solid transparent;
     font-family: var(--font-code);
-    font-size: 12.5px;
+    font-size: calc(12.5px * var(--text-scale));
     color: var(--color-text);
     white-space: pre;
     pointer-events: none;

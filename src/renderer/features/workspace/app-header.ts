@@ -55,12 +55,12 @@ export class AppHeader extends LitElement {
         align-items: center;
         gap: var(--space-2);
         font-weight: 600;
-        font-size: 14px;
+        font-size: calc(14px * var(--text-scale));
         pointer-events: none;
       }
       .context {
         color: var(--color-text-muted);
-        font-size: 13.5px;
+        font-size: calc(13.5px * var(--text-scale));
       }
       .spacer {
         flex: 1;
@@ -75,7 +75,7 @@ export class AppHeader extends LitElement {
       }
       ui-select::part(trigger) {
         padding: 7px 10px;
-        font-size: 14px;
+        font-size: calc(14px * var(--text-scale));
       }
     `,
   ];

@@ -60,7 +60,7 @@ export const networkLogStyles = css`
     flex-wrap: wrap;
     align-items: baseline;
     gap: var(--space-2) var(--space-3);
-    font-size: 13px;
+    font-size: calc(13px * var(--text-scale));
   }
   .summary .url {
     font-family: var(--font-code);
@@ -73,7 +73,7 @@ export const networkLogStyles = css`
     padding: 1px 8px;
     border-radius: 999px;
     font-weight: 600;
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
     white-space: nowrap;
   }
   .tone-success {
@@ -96,14 +96,14 @@ export const networkLogStyles = css`
     border-radius: var(--radius);
     background: var(--color-danger-background);
     color: var(--color-danger);
-    font-size: 13px;
+    font-size: calc(13px * var(--text-scale));
     line-height: 1.6;
   }
   .error-card code {
     display: block;
     margin-top: var(--space-1);
     font-family: var(--font-code);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
     word-break: break-word;
   }
   details {
@@ -118,7 +118,7 @@ export const networkLogStyles = css`
   summary {
     padding: var(--space-2) var(--space-3);
     cursor: pointer;
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
     font-weight: 600;
   }
   summary .muted {
@@ -131,7 +131,7 @@ export const networkLogStyles = css`
     width: 100%;
     border-collapse: collapse;
     font-family: var(--font-code);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
   }
   td {
     padding: 3px var(--space-2) 3px 0;
@@ -151,7 +151,7 @@ export const networkLogStyles = css`
     border-radius: var(--radius);
     background: var(--color-sunken);
     font-family: var(--font-code);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
     white-space: pre-wrap;
     word-break: break-word;
     user-select: text;
@@ -166,7 +166,7 @@ export const networkLogStyles = css`
   }
   .empty {
     color: var(--color-text-muted);
-    font-size: 12px;
+    font-size: calc(12px * var(--text-scale));
     margin: 0;
   }
 `;

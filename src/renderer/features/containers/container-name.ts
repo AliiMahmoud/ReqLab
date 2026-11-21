@@ -24,7 +24,7 @@ export class ContainerName extends LitElement {
         padding: 3px 6px;
         border: 1px solid transparent;
         background: transparent;
-        font-size: 15px;
+        font-size: calc(15px * var(--text-scale));
         font-weight: 600;
         text-align: start;
         cursor: text;
@@ -38,7 +38,7 @@ export class ContainerName extends LitElement {
         min-width: 260px;
         max-width: 560px;
         padding: 3px 6px;
-        font-size: 15px;
+        font-size: calc(15px * var(--text-scale));
         font-weight: 600;
       }
     `,
