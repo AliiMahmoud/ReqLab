@@ -70,7 +70,8 @@ export class NetworkLog {
 
   /** The first failure wins: the network layer's own, with Node's code, comes before the sender's. */
   fail(message: string, cause?: string): void {
-    this.#error ??= { message, ...(cause === undefined ? {} : { cause }) };
+    if (this.#error !== undefined) return;
+    this.#error = { message, ...(cause === undefined ? {} : { cause }) };
     this.add(`Failed: ${message}${cause === undefined ? "" : ` [${cause}]`}`);
   }
 

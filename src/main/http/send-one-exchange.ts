@@ -28,7 +28,7 @@ interface Route {
 
 /**
  * Sends exactly one request and reads its response; redirects are handled by the caller.
- * A fresh connection every time (agent: false), so timings are real and nothing is shared.
+ * A fresh connection every time (no shared agent), so timings are real and nothing is shared.
  */
 export async function sendOneExchange(
   request: PreparedRequest,
@@ -81,10 +81,8 @@ function exchange(
 ): Promise<RawResponse> {
   return new Promise((resolve, reject) => {
     const timer = new ExchangeTimer();
-    const extraHeaders = route.options.headers as Record<string, string> | undefined;
-    const headers = { host: request.url.host, ...toNodeHeaders(request.headers), ...extraHeaders };
-    log.noteSentHeaders(toHeaderList(headers));
-    const options = { ...route.options, method: request.method, headers, agent: false, signal };
+    const options = requestOptions(request, route, signal);
+    log.noteSentHeaders(toHeaderList(options.headers));
     const outgoing =
       typeof route.target === "string"
         ? route.transport.request(options)
@@ -104,6 +102,16 @@ function exchange(
     outgoing.on("error", reject);
     outgoing.end(request.body);
   });
+}
+
+/** Node's options for one request: its headers as sent, the route's TLS / proxy options, the agent. */
+function requestOptions(request: PreparedRequest, route: Route, signal: AbortSignal) {
+  const extraHeaders = route.options.headers as Record<string, string> | undefined;
+  const headers = { host: request.url.host, ...toNodeHeaders(request.headers), ...extraHeaders };
+  // A fresh agent for every request, except through a proxy tunnel: Node ignores
+  // `createConnection` whenever an agent is set, and would connect to the server directly.
+  const connection = route.options.createConnection === undefined ? { agent: false as const } : {};
+  return { ...route.options, method: request.method, headers, signal, ...connection };
 }
 
 async function receive(
