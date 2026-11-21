@@ -79,31 +79,13 @@ export const keyValueTableStyles = css`
     font-family: var(--font-code);
     font-size: calc(12.5px * var(--text-scale));
   }
-  /* A value that may span lines grows with its content (no scroll bar, no resize handle). Its
-     first line sits where a one-line cell's text would, whatever the row height. */
-  .is-multiline {
-    --multiline-padding: max(2px, calc((var(--row-height) - 16px * var(--text-scale)) / 2));
+  /* Values wrap and grow (see wrapping-field.ts); the first line sits where a one-line cell's
+     text would, whatever the row height. */
+  .wrapping-field {
+    --wrap-padding-y: max(2px, calc((var(--row-height) - 16px * var(--text-scale)) / 2));
   }
   textarea.cell {
-    display: block;
     min-height: var(--row-height);
-    padding: var(--multiline-padding) 10px;
-    line-height: calc(16px * var(--text-scale));
-    resize: none;
-    field-sizing: content;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-  }
-  .is-multiline .variable-overlay {
-    align-items: flex-start;
-    padding: var(--multiline-padding) 10px;
-    line-height: calc(16px * var(--text-scale));
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-  }
-  .is-multiline .variable-overlay > span {
-    flex: 1;
-    min-width: 0;
   }
   .cell:focus-visible {
     outline: none;

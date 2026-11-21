@@ -30,12 +30,13 @@ export function variableOverlay(value: string): TemplateResult | undefined {
   >`;
 }
 
-/** Keeps the overlay scrolled with a long value (attach to the input's input / scroll / keyup / select). */
+/** Keeps the overlay scrolled with a long value, sideways and (in a text box) down. Attach to input / scroll / keyup / select. */
 export function syncVariableOverlay(event: Event): void {
   const input = event.target as HTMLInputElement;
   const overlay = input.nextElementSibling;
   if (overlay instanceof HTMLElement && overlay.classList.contains("variable-overlay")) {
     overlay.scrollLeft = input.scrollLeft;
+    overlay.scrollTop = input.scrollTop;
   }
 }
 

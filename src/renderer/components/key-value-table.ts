@@ -14,6 +14,7 @@ import {
 } from "./variable-highlight";
 import { appSettings } from "../stores/app-settings-store";
 import { knownVariableNames } from "../stores/environment-store";
+import { renderWrappingField, wrappingFieldStyles } from "./wrapping-field";
 import { watch } from "../controllers/signal-watcher";
 
 type Field = "key" | "value" | "description";
@@ -23,7 +24,7 @@ type Field = "key" | "value" | "description";
  * blank last row for adding and a Bulk Edit mode ("key:value" per line, "//" disables a row).
  */
 export class KeyValueTable extends LitElement {
-  static override styles = [formStyles, keyValueTableStyles, variableFieldStyles];
+  static override styles = [formStyles, keyValueTableStyles, variableFieldStyles, wrappingFieldStyles];
   static override properties = {
     rows: { attribute: false },
     keyLabel: { attribute: false },
@@ -120,9 +121,7 @@ export class KeyValueTable extends LitElement {
     };
     const value = row[field] ?? "";
     const highlights = field !== "description";
-    if (this.spansLines(field)) {
-      return renderLinesCell({ value, label: labels[field], isBlank: index === this.rows.length }, update);
-    }
+    if (field === "value") return this.renderValueCell(value, index);
     return html`<span class="variable-field"
       ><input
         class="cell ${highlights && hasVariables(value) ? "has-variables" : ""}"
@@ -139,9 +138,24 @@ export class KeyValueTable extends LitElement {
     >`;
   }
 
+  /** Values wrap and grow instead of scrolling sideways; line breaks only where they are allowed. */
+  private renderValueCell(value: string, index: number): TemplateResult {
+    const placeholder = index === this.rows.length ? "Value" : "";
+    const cell = {
+      value,
+      label: "Value",
+      placeholder,
+      className: "cell",
+      allowsNewLines: this.allowsLineBreaks(),
+    };
+    return renderWrappingField(cell, (next) => {
+      this.change(index, { value: next });
+    });
+  }
+
   /** Values of body form tables, when Settings › New lines in form values is on. */
-  private spansLines(field: Field): boolean {
-    return field === "value" && this.allowsNewLines && appSettings.get().multilineValues;
+  private allowsLineBreaks(): boolean {
+    return this.allowsNewLines && appSettings.get().multilineValues;
   }
 
   private renderBulk(text: string): TemplateResult {
@@ -167,25 +181,6 @@ export class KeyValueTable extends LitElement {
   private readonly toggleBulk = (): void => {
     this.bulkText = this.bulkText === undefined ? toBulkText(this.rows) : undefined;
   };
-}
-
-/** A value that may span lines: a text box that grows with its content; Enter adds a line. */
-function renderLinesCell(
-  cell: { value: string; label: string; isBlank: boolean },
-  update: (event: Event) => void,
-): TemplateResult {
-  return html`<span class="variable-field is-multiline">
-    <textarea
-      class="cell ${hasVariables(cell.value) ? "has-variables" : ""}"
-      rows="1"
-      aria-label=${cell.label}
-      placeholder=${cell.isBlank ? cell.label : ""}
-      spellcheck="false"
-      .value=${cell.value}
-      @input=${update}
-    ></textarea
-    >${variableOverlay(cell.value)}</span
-  >`;
 }
 
 customElements.define("key-value-table", KeyValueTable);

@@ -4,12 +4,8 @@ import { AUTH_FIELDS, AUTH_TYPE_LABELS, createDefaultAuth, type AuthField } from
 import { watch } from "../controllers/signal-watcher";
 import { knownVariableNames } from "../stores/environment-store";
 import { formStyles } from "./shared-styles";
-import {
-  hasVariables,
-  syncVariableOverlay,
-  variableFieldStyles,
-  variableOverlay,
-} from "./variable-highlight";
+import { variableFieldStyles } from "./variable-highlight";
+import { renderWrappingField, wrappingFieldStyles } from "./wrapping-field";
 import "./oauth2-token-panel";
 import "./ui-select";
 
@@ -23,6 +19,7 @@ export class AuthEditor extends LitElement {
   static override styles = [
     formStyles,
     variableFieldStyles,
+    wrappingFieldStyles,
     css`
       :host {
         display: block;
@@ -57,8 +54,9 @@ export class AuthEditor extends LitElement {
         color: var(--color-text-muted);
         font-size: calc(12px * var(--text-scale));
       }
-      .field .variable-field input {
-        width: 100%;
+      /* The label lines up with the first line of a value that wraps onto more. */
+      .field:has(.wrapping-field) {
+        align-items: baseline;
       }
       .field.is-multiline {
         align-items: start;
@@ -81,7 +79,7 @@ export class AuthEditor extends LitElement {
       textarea {
         font-family: var(--font-code);
       }
-      textarea {
+      .is-multiline textarea {
         min-height: 72px;
         resize: vertical;
       }
@@ -170,11 +168,8 @@ export class AuthEditor extends LitElement {
       const next: Record<string, unknown> = { ...this.auth, [field.name]: fieldValue };
       this.onChange(next as RequestAuth);
     };
-    const update = (event: Event): void => {
-      set((event.target as HTMLInputElement).value);
-    };
     if (field.kind === "choice") return renderChoice(field, value, set);
-    return renderTextField(field, value, update);
+    return renderTextField(field, value, set);
   }
 
   private readonly changeType = (type: string): void => {
@@ -199,34 +194,21 @@ function renderChoice(field: AuthField, value: string, choose: (value: string) =
   </label>`;
 }
 
-function renderTextField(field: AuthField, value: string, update: (event: Event) => void): TemplateResult {
+/** A multi-line field (e.g. a JWT payload) keeps its line breaks; any other value wraps and grows. */
+function renderTextField(field: AuthField, value: string, set: (value: string) => void): TemplateResult {
   const placeholder = field.placeholder ?? "";
   if (field.kind === "multiline") {
+    const update = (event: Event): void => {
+      set((event.target as HTMLTextAreaElement).value);
+    };
     return html`<label class="field is-multiline"
       >${field.label}
       <textarea spellcheck="false" placeholder=${placeholder} .value=${value} @input=${update}></textarea>
     </label>`;
   }
-  const onInput = (event: Event): void => {
-    update(event);
-    syncVariableOverlay(event);
-  };
   return html`<label class="field"
     >${field.label}
-    <span class="variable-field">
-      <input
-        data-variables
-        class=${hasVariables(value) ? "has-variables" : ""}
-        type="text"
-        autocomplete="off"
-        spellcheck="false"
-        placeholder=${placeholder}
-        .value=${value}
-        @input=${onInput}
-        @scroll=${syncVariableOverlay}
-        @keyup=${syncVariableOverlay}
-      />${variableOverlay(value)}
-    </span>
+    ${renderWrappingField({ value, label: field.label, placeholder, allowsNewLines: false }, set)}
   </label>`;
 }
 
