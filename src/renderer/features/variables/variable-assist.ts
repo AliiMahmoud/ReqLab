@@ -1,11 +1,12 @@
-import { insertVariable, offsetOfIndex, openVariableAtCaret, tokenAtPoint } from "./variable-text";
+import { caretPoint, popoverTop, type TextField } from "./field-geometry";
+import { insertVariable, openVariableAtCaret, tokenAtPoint } from "./variable-text";
 import { VariablePopover } from "./variable-popover";
 
 const HOVER_DELAY_MS = 350;
 const LEAVE_GRACE_MS = 300;
 
 /**
- * Postman-style help for {{variables}} in every text field marked with `data-variables`:
+ * Postman-style help for {{variables}} in every input or text box marked with `data-variables`:
  * typing "{{" suggests names, and hovering a {{name}} shows its value with an editor.
  * Events are read through shadow roots with composedPath(), so fields need no wiring of their own.
  */
@@ -36,13 +37,14 @@ export function installVariableAssist(): void {
   });
 }
 
-function variableField(event: Event): HTMLInputElement | undefined {
+function variableField(event: Event): TextField | undefined {
   const target = event.composedPath()[0];
-  return target instanceof HTMLInputElement && target.dataset["variables"] !== undefined ? target : undefined;
+  const isField = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement;
+  return isField && target.dataset["variables"] !== undefined ? target : undefined;
 }
 
 class VariableAssist {
-  #suggestingIn: HTMLInputElement | undefined;
+  #suggestingIn: TextField | undefined;
   #hoverTimer: ReturnType<typeof setTimeout> | undefined;
   #leaveTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -63,8 +65,8 @@ class VariableAssist {
       insertVariable(input, open.start, name);
       this.closeSuggestions();
     };
-    const top = input.getBoundingClientRect().bottom + 4;
-    this.popover.showAt("suggest", { left: offsetOfIndex(input, open.start), top });
+    const caret = caretPoint(input, open.start);
+    this.popover.showAt("suggest", { left: caret.left, top: popoverTop(input, caret.bottom) });
   }
 
   onKeyDown(event: KeyboardEvent): void {
@@ -90,7 +92,8 @@ class VariableAssist {
       return;
     }
     const input = variableField(event);
-    const token = input === undefined ? undefined : tokenAtPoint(input, event.clientX);
+    const token =
+      input === undefined ? undefined : tokenAtPoint(input, { x: event.clientX, y: event.clientY });
     clearTimeout(this.#hoverTimer);
     if (input === undefined || token === undefined) {
       this.leaveCardSoon();
@@ -100,8 +103,8 @@ class VariableAssist {
     if (this.popover.mode === "details" && this.popover.detailName === token.name) return;
     this.#hoverTimer = setTimeout(() => {
       this.popover.detailName = token.name;
-      const left = offsetOfIndex(input, token.start);
-      this.popover.showAt("details", { left, top: input.getBoundingClientRect().bottom + 4 });
+      const at = caretPoint(input, token.start);
+      this.popover.showAt("details", { left: at.left, top: popoverTop(input, at.bottom) });
     }, HOVER_DELAY_MS);
   }
 

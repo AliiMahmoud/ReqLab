@@ -6,6 +6,7 @@ import { css } from "lit";
  */
 export const uiSelectStyles = css`
   :host {
+    position: relative;
     display: inline-flex;
     min-width: 0;
   }
@@ -40,6 +41,36 @@ export const uiSelectStyles = css`
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  /* Room at the trigger's end, after the arrow, for the action button laid over it. */
+  .action-room {
+    flex: none;
+    width: 22px;
+  }
+  .trigger-action {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+  .trigger-action:hover {
+    background: var(--color-selected);
+    color: var(--color-text);
+  }
+  .trigger-action:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
   }
   .chevron {
     display: inline-flex;

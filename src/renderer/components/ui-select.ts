@@ -27,6 +27,7 @@ export class UiSelect extends LitElement {
     value: { attribute: false },
     label: { attribute: false },
     onChange: { attribute: false },
+    triggerAction: { attribute: false },
     isOpen: { state: true },
     highlighted: { state: true },
   };
@@ -36,6 +37,8 @@ export class UiSelect extends LitElement {
   /** The accessible name, e.g. "Body type". */
   declare label: string;
   declare onChange: (value: string) => void;
+  /** A small icon button inside the closed dropdown, at its end after the arrow (e.g. "Manage environments"). */
+  declare triggerAction: SelectOption["action"];
   declare isOpen: boolean;
   declare highlighted: number;
 
@@ -63,14 +66,30 @@ export class UiSelect extends LitElement {
         @keydown=${this.handleTriggerKey}
       >
         ${renderDot(selected?.dot)}<span class="label">${selected?.label ?? ""}</span
-        ><span class="chevron">${chevronDownIcon()}</span>
+        ><span class="chevron">${chevronDownIcon()}</span
+        >${this.triggerAction === undefined ? undefined : html`<span class="action-room"></span>`}
       </button>
+      ${this.renderTriggerAction()}
       <div id="options" popover="auto" @beforetoggle=${this.prepareToOpen} @toggle=${this.syncOpenState}>
         <ul role="listbox" tabindex="-1" aria-label=${this.label} @keydown=${this.handleListKey}>
           ${this.options.map((option, index) => this.renderOption(option, index))}
         </ul>
       </div>
     `;
+  }
+
+  /** Drawn over the trigger, in the room kept for it (a button cannot hold another button). */
+  private renderTriggerAction(): TemplateResult | undefined {
+    const action = this.triggerAction;
+    if (action === undefined) return undefined;
+    return html`<button
+      class="trigger-action"
+      aria-label=${action.label}
+      title=${action.label}
+      @click=${action.run}
+    >
+      ${action.icon}
+    </button>`;
   }
 
   private renderOption(option: SelectOption, index: number): TemplateResult {

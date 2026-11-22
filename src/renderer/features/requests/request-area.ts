@@ -26,6 +26,7 @@ import type { SaveRequestDialog } from "./save-request-dialog";
 import "./save-request-dialog";
 import "./url-bar";
 import { isRequestCommand, REQUEST_COMMAND_EVENT } from "./request-commands";
+import { mainView } from "../../stores/view-store";
 
 /** The main column: open tabs, then the URL bar and the request / response split. */
 export class RequestArea extends LitElement {
@@ -133,8 +134,9 @@ export class RequestArea extends LitElement {
 
   /** Cmd/Ctrl+Enter and Cmd/Ctrl+S from the application menu: they work wherever focus is. */
   private readonly runCommand = (event: Event): void => {
-    // A settings tab has nothing to send, and saves itself.
+    // A settings tab has nothing to send, and saves itself; hidden behind Environments, nothing runs.
     if (!isRequestCommand(event) || getActiveTab()?.container !== undefined) return;
+    if (mainView.get() !== "requests") return;
     if (event.detail === "send") this.sendOrCancel();
     else this.save();
   };

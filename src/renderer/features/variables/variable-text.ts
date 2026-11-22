@@ -1,4 +1,6 @@
-/** Text helpers for {{variables}} inside a plain <input>: where they are, and what is under the mouse. */
+import { measureRanges, type TextField } from "./field-geometry";
+
+/** Text helpers for {{variables}} in a field: where they are, and what is under the mouse. */
 
 export interface VariableToken {
   name: string;
@@ -19,7 +21,7 @@ export function findTokens(text: string): VariableToken[] {
 }
 
 /** The partly typed name after an unclosed "{{" at the caret, with where the "{{" starts. */
-export function openVariableAtCaret(input: HTMLInputElement): { prefix: string; start: number } | undefined {
+export function openVariableAtCaret(input: TextField): { prefix: string; start: number } | undefined {
   const caret = input.selectionStart ?? input.value.length;
   if (caret !== (input.selectionEnd ?? caret)) return undefined;
   const match = OPEN_BEFORE_CARET.exec(input.value.slice(0, caret));
@@ -28,7 +30,7 @@ export function openVariableAtCaret(input: HTMLInputElement): { prefix: string; 
 }
 
 /** Replaces the typed "{{pre" with "{{name}}" (reusing a "}}" already after the caret) and tells the field. */
-export function insertVariable(input: HTMLInputElement, start: number, name: string): void {
+export function insertVariable(input: TextField, start: number, name: string): void {
   const caret = input.selectionStart ?? input.value.length;
   const after = input.value.slice(caret).replace(/^[^{}\s]*\}\}/, "");
   const inserted = `{{${name}}}`;
@@ -38,24 +40,15 @@ export function insertVariable(input: HTMLInputElement, start: number, name: str
   input.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
 }
 
-let measuringContext: CanvasRenderingContext2D | null | undefined;
-
-/** Horizontal pixel offset of a character position inside the field, in viewport coordinates. */
-export function offsetOfIndex(input: HTMLInputElement, index: number): number {
-  const style = getComputedStyle(input);
-  measuringContext ??= document.createElement("canvas").getContext("2d");
-  if (measuringContext === null) return input.getBoundingClientRect().left;
-  measuringContext.font = style.font;
-  const width = measuringContext.measureText(input.value.slice(0, index)).width;
-  const contentLeft =
-    input.getBoundingClientRect().left + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft);
-  return contentLeft + width - input.scrollLeft;
-}
-
-/** The {{variable}} under the mouse pointer, if any. */
-export function tokenAtPoint(input: HTMLInputElement, clientX: number): VariableToken | undefined {
-  if (input.type === "password") return undefined;
-  return findTokens(input.value).find(
-    (token) => clientX >= offsetOfIndex(input, token.start) && clientX <= offsetOfIndex(input, token.end),
+/** The {{variable}} under the mouse pointer, if any (on any line of a wrapping text box). */
+export function tokenAtPoint(field: TextField, point: { x: number; y: number }): VariableToken | undefined {
+  if (field instanceof HTMLInputElement && field.type === "password") return undefined;
+  const tokens = findTokens(field.value);
+  if (tokens.length === 0) return undefined;
+  const boxes = measureRanges(field, tokens);
+  return tokens.find((_token, index) =>
+    (boxes[index] ?? []).some(
+      (box) => point.x >= box.left && point.x <= box.right && point.y >= box.top && point.y <= box.bottom,
+    ),
   );
 }

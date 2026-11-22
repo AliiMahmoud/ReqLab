@@ -29,6 +29,7 @@ export function renderWrappingField(field: WrappingField, onValue: (value: strin
   };
   return html`<span class="variable-field wrapping-field">
     <textarea
+      data-variables
       class="${field.className ?? ""} ${hasVariables(field.value) ? "has-variables" : ""}"
       rows="1"
       aria-label=${field.label}
@@ -58,15 +59,27 @@ function showStart(event: FocusEvent): void {
 }
 
 /**
- * Hosts may set --wrap-padding-y / --wrap-padding-x to their text boxes' padding, and
- * --variable-overlay-border to their border width, so the coloured copy lines up with the text.
+ * Like the URL bar: the coloured copy sits behind the text box, whose text and background are
+ * transparent, so the caret and selection are drawn on top. The field's background is on the
+ * wrapper (--wrap-background, --wrap-radius). Hosts may set --wrap-padding-y / --wrap-padding-x
+ * to their text boxes' padding, and --variable-overlay-border to their border width.
  */
 export const wrappingFieldStyles = css`
+  .wrapping-field {
+    background: var(--wrap-background, transparent);
+    border-radius: var(--wrap-radius, 0);
+  }
+  .wrapping-field > .variable-overlay {
+    z-index: 0;
+  }
   /* Not being edited: one line that scrolls sideways, with no scroll bar (a value with line
      breaks shows its first). */
   .wrapping-field > textarea {
+    position: relative;
+    z-index: 1;
     display: block;
     width: 100%;
+    background: transparent;
     max-height: calc(
       16px * var(--text-scale) + 2 * var(--wrap-padding-y, 7px) + 2 * var(--variable-overlay-border, 0px)
     );

@@ -38,6 +38,13 @@ export class WorkspaceHome extends LitElement {
         display: flex;
         min-height: 0;
       }
+      /* Lays its children out as if they were the body's own. */
+      .requests {
+        display: contents;
+      }
+      .requests[hidden] {
+        display: none;
+      }
       .toast {
         position: fixed;
         bottom: var(--space-4);
@@ -96,14 +103,16 @@ export class WorkspaceHome extends LitElement {
 
   override render(): TemplateResult {
     const message = notice.get();
+    const isEnvironments = mainView.get() === "environments";
+    // The requests stay in the page (hidden) while Environments is open, so their editors keep
+    // their undo history and scroll position.
     return html`
       <app-header .workspace=${this.workspace}></app-header>
       <div class="body">
-        ${
-          mainView.get() === "environments"
-            ? html`<environments-page .workspaceId=${this.workspace.id}></environments-page>`
-            : html`${this.renderSidebar()} <request-area .workspaceId=${this.workspace.id}></request-area>`
-        }
+        <div class="requests" ?hidden=${isEnvironments}>
+          ${this.renderSidebar()} <request-area .workspaceId=${this.workspace.id}></request-area>
+        </div>
+        ${isEnvironments ? html`<environments-page .workspaceId=${this.workspace.id}></environments-page>` : undefined}
       </div>
       ${
         message === undefined

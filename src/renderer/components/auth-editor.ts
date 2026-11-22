@@ -42,6 +42,8 @@ export class AuthEditor extends LitElement {
       .fields {
         --variable-overlay-padding: 0 10px;
         --variable-overlay-border: 1px;
+        --wrap-background: var(--color-field);
+        --wrap-radius: var(--radius);
         display: grid;
         gap: var(--space-2);
         max-width: 640px;

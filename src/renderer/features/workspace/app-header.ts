@@ -13,6 +13,9 @@ import { renderSettingsButton, type SettingsDialog } from "../settings/settings-
 import "../../components/ui-select";
 import type { SelectOption } from "../../components/ui-select";
 
+/** The button inside the environment picker, beside the chosen environment's name. */
+const MANAGE_ENVIRONMENTS = { label: "Manage environments", icon: slidersIcon(), run: showEnvironments };
+
 /** The last option of the environment picker: creates an environment instead of choosing one. */
 const NEW_ENVIRONMENT = "__new-environment__";
 
@@ -112,6 +115,7 @@ export class AppHeader extends LitElement {
           .value=${activeId ?? ""}
           .label=${"Environment"}
           .onChange=${this.chooseEnvironment}
+          .triggerAction=${MANAGE_ENVIRONMENTS}
         ></ui-select>
       </label>
     `;
@@ -124,11 +128,7 @@ export class AppHeader extends LitElement {
   /** Each environment with its colour dot; protected ones are named so and shown in red. */
   private environmentOptions(): SelectOption[] {
     return [
-      {
-        value: "",
-        label: "No environment",
-        action: { label: "Manage environments", icon: slidersIcon(), run: showEnvironments },
-      },
+      { value: "", label: "No environment" },
       ...environments.get().map((environment): SelectOption => ({
         value: environment.id,
         label: environment.isProtected ? `${environment.name} (protected)` : environment.name,

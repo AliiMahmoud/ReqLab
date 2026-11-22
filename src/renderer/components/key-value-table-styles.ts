@@ -89,8 +89,12 @@ export const keyValueTableStyles = css`
   }
   .cell:focus-visible {
     outline: none;
-    background: var(--color-field);
     box-shadow: inset 0 0 0 1px var(--color-accent);
+  }
+  /* The editing background: on the input, or behind a value's coloured copy (see wrapping-field.ts). */
+  input.cell:focus-visible,
+  .wrapping-field:focus-within {
+    background: var(--color-field);
   }
   .cell::placeholder {
     color: var(--color-text-faint);

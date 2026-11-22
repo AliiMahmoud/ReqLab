@@ -74,13 +74,16 @@ export const variableFieldStyles = css`
   .variable-overlay > span {
     flex: none;
   }
+  /* The same chip as in the URL bar. */
   .variable {
     color: var(--color-variable);
     background: var(--color-variable-background);
     border-radius: 3px;
+    box-shadow: 0 0 0 2px var(--color-variable-background);
   }
   .variable.is-missing {
     color: var(--color-variable-missing);
     background: var(--color-variable-missing-background);
+    box-shadow: 0 0 0 2px var(--color-variable-missing-background);
   }
 `;
