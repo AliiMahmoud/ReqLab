@@ -111,14 +111,6 @@ export function cancelAddingWorkspace(): void {
   isAddingWorkspace.set(false);
 }
 
-/** Main locked everything (idle, sleep, screen lock): show the unlock card of what was open. */
-export function handleWorkspacesLockedByMain(): void {
-  const wasOpen = openWorkspaceId.get();
-  if (wasOpen !== undefined) selectedWorkspaceId.set(wasOpen);
-  openWorkspaceId.set(undefined);
-  void loadWorkspaces();
-}
-
 async function saveOpenTabs(): Promise<void> {
   const current = openWorkspaceId.get();
   if (current !== undefined) await persistTabs(current);

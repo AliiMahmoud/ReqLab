@@ -17,8 +17,6 @@ type Handler<C extends Channel> = (input: ParsedInput<C>) => ChannelOutput<C> | 
  * and turns any failure into a safe { ok: false } result (no stack traces cross).
  */
 export class IpcRouter {
-  constructor(private readonly onActivity: () => void) {}
-
   handle<C extends Channel>(channel: C, handler: Handler<C>): void {
     ipcMain.handle(channel, (event, rawInput: unknown) => this.run(channel, handler, { event, rawInput }));
   }
@@ -30,7 +28,6 @@ export class IpcRouter {
   ): Promise<Result<ChannelOutput<C>>> {
     try {
       assertTrustedSender(call.event);
-      this.onActivity();
       const input = parseInput(channel, call.rawInput);
       const output = await handler(input);
       return { ok: true, value: ipcContract[channel].output.parse(output) as ChannelOutput<C> };

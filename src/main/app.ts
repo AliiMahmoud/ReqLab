@@ -1,6 +1,5 @@
 import { join } from "node:path";
 import { app, BrowserWindow, session } from "electron";
-import { MainEvents } from "@shared/main-events";
 import { ChosenFiles } from "./interop/chosen-files";
 import { InteropService } from "./interop/interop-service";
 import { IpcRouter } from "./ipc/ipc-router";
@@ -25,7 +24,6 @@ import { RequestSettingsStore } from "./network/request-settings-store";
 import { RequestSender } from "./pipeline/request-sender";
 import { ClipboardGuard } from "./secrets/clipboard-guard";
 import { VariableService } from "./variables/variable-service";
-import { AutoLock } from "./workspaces/auto-lock";
 import { WorkspaceData } from "./workspaces/workspace-data";
 import { WorkspaceService } from "./workspaces/workspace-service";
 
@@ -49,14 +47,7 @@ export async function startApplication(): Promise<void> {
   serveRendererFromAppProtocol(RENDERER_DIRECTORY);
 
   const services = createServices();
-  const autoLock = new AutoLock(services.workspaces, notifyRendererWorkspacesLocked);
-  registerIpcHandlers(
-    new IpcRouter(() => {
-      autoLock.recordActivity();
-    }),
-    services,
-  );
-  autoLock.start();
+  registerIpcHandlers(new IpcRouter(), services);
 
   lockEverythingOnExit(services.workspaces);
   focusExistingWindowOnSecondLaunch();
@@ -85,10 +76,6 @@ function createServices(): IpcServices {
     interop: new InteropService(workspaces, data, new ChosenFiles()),
     clipboard: new ClipboardGuard(),
   };
-}
-
-function notifyRendererWorkspacesLocked(): void {
-  for (const window of BrowserWindow.getAllWindows()) window.webContents.send(MainEvents.workspacesLocked);
 }
 
 function lockEverythingOnExit(workspaces: WorkspaceService): void {

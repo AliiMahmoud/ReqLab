@@ -18,7 +18,7 @@ import { isSidebarHidden, sidebarWidth } from "../../stores/sidebar-width-store"
 import { renderSidebarToggle, sidebarToggleStyles } from "../sidebar/sidebar-toggle";
 import "../workspace/app-header";
 
-/** Short, so little is lost if the app quits or auto-locks right after an edit. */
+/** Short, so little is lost if the app quits right after an edit. */
 const PERSIST_DELAY_MS = 300;
 
 /** An open workspace: header, then either the request view (sidebar + tabs) or the environments page. */

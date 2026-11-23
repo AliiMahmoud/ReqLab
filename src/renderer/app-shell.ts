@@ -16,7 +16,6 @@ import "./features/workspaces/welcome-screen";
 import "./features/workspaces/workspace-home";
 import {
   findWorkspace,
-  handleWorkspacesLockedByMain,
   hasLoaded,
   isAddingWorkspace,
   openWorkspaceId,
@@ -39,10 +38,7 @@ export class AppShell extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.#stopListening.push(
-      api.onWorkspacesLocked(handleWorkspacesLockedByMain),
-      api.onMenuCommand(runMenuCommand),
-    );
+    this.#stopListening.push(api.onMenuCommand(runMenuCommand));
     void startApp();
   }
 

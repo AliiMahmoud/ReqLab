@@ -88,8 +88,6 @@ type ApiMethod<C extends Channel> =
 export type ReqLabApi = {
   [M in keyof typeof apiMethods]: ApiMethod<(typeof apiMethods)[M]>;
 } & {
-  /** Called when main locks workspaces (idle timeout, sleep, screen lock). Returns an unsubscribe function. */
-  onWorkspacesLocked: (listener: () => void) => () => void;
   /** Called for menu shortcuts (new tab, close tab, reopen closed tab). Returns an unsubscribe function. */
   onMenuCommand: (listener: (command: MenuCommand) => void) => () => void;
 };

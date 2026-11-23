@@ -1,6 +1,5 @@
 /** Messages main pushes to the renderer. They carry no secrets. Kept free of zod so preload stays tiny. */
 export const MainEvents = {
-  workspacesLocked: "event:workspaces-locked",
   menuCommand: "event:menu-command",
 } as const;
 

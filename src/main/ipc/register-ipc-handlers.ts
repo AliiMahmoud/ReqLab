@@ -1,4 +1,3 @@
-import { AUTO_LOCK_MINUTES } from "../workspaces/auto-lock";
 import type { IpcRouter } from "./ipc-router";
 import type { IpcServices } from "./ipc-services";
 import { registerCollectionHandlers } from "./register-collection-handlers";
@@ -31,7 +30,6 @@ function registerWorkspaceHandlers(router: IpcRouter, { keys, workspaces }: IpcS
   router.handle("app:get-security-status", async () => ({
     keyProtection: keys.keyProtectionName(),
     isMasterPasswordRequired: await keys.isMasterPasswordRequired(),
-    autoLockMinutes: AUTO_LOCK_MINUTES,
   }));
   router.handle("workspaces:list", () => workspaces.listWorkspaces());
   router.handle("workspaces:get-last", () => workspaces.findLastWorkspace());

@@ -16,15 +16,6 @@ const invokers = Object.fromEntries(
 
 const api = {
   ...invokers,
-  onWorkspacesLocked: (listener: () => void) => {
-    const handler = (): void => {
-      listener();
-    };
-    ipcRenderer.on(MainEvents.workspacesLocked, handler);
-    return () => {
-      ipcRenderer.removeListener(MainEvents.workspacesLocked, handler);
-    };
-  },
   onMenuCommand: (listener: (command: MenuCommand) => void) => {
     // Only known command names reach the UI; the Electron event object never does.
     const handler = (_event: unknown, command: unknown): void => {

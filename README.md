@@ -126,7 +126,7 @@ You can move it anywhere from **Settings › General › Data folder**: ReqLab m
 - **Workspaces:**
   - Each one is a SQLCipher (AES-256) file with its own random 256-bit key.
   - That key is wrapped by the OS keychain (macOS Keychain, Windows DPAPI, Linux libsecret / KWallet) and, if you set one, by a master password (Argon2id or scrypt, then AES-256-GCM).
-- **Auto-lock:** after 15 idle minutes, on sleep and on screen lock. Locking closes the database and wipes the keys from memory.
+- **Locking** a workspace closes its database and wipes its key from memory; quitting the app locks every workspace.
 - **The UI is sandboxed:**
   - Context isolation, no Node.
   - A strict Content Security Policy: it cannot open any network connection.

@@ -5,6 +5,5 @@ export const SecurityStatus = z.object({
   keyProtection: z.string(),
   /** True when the OS offers no real key protection, so every workspace needs a master password. */
   isMasterPasswordRequired: z.boolean(),
-  autoLockMinutes: z.number().int().positive(),
 });
 export type SecurityStatus = z.infer<typeof SecurityStatus>;
