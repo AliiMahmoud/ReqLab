@@ -140,7 +140,7 @@ export class ContainerSettingsView extends LitElement {
       this.change({ scripts: next });
     };
     return html`<p class="hint">Run for every request inside, before the request's own scripts.</p>
-      <scripts-editor .scripts=${scripts} .onChange=${change}></scripts-editor>`;
+      <scripts-editor .historyKey=${this.tab.id} .scripts=${scripts} .onChange=${change}></scripts-editor>`;
   }
 
   private change(change: Partial<ContainerSettings>): void {

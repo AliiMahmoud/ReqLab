@@ -60,6 +60,12 @@ export class UrlBar extends LitElement {
         @paste=${this.pasteUrl}
         @scroll=${this.syncScroll}
         @keyup=${this.syncScroll}
+        @keydown=${this.syncScroll}
+        @select=${this.syncScroll}
+        @selectionchange=${this.syncScroll}
+        @focus=${this.syncScroll}
+        @blur=${this.syncScroll}
+        @pointerdown=${this.followWhileSelecting}
       />
     </label>`;
   }
@@ -147,13 +153,41 @@ export class UrlBar extends LitElement {
       params: paramsFromUrl(url, params),
       pathVariables: pathVariablesFromUrl(url, pathVariables),
     });
-    this.syncScroll(event);
+    this.syncScroll();
   };
 
-  private readonly syncScroll = (event: Event): void => {
+  /**
+   * The coloured copy behind the transparent input must scroll with it, or a long URL's selection
+   * lands on other text. Selecting, Cmd/Ctrl+A or a changed URL can scroll it without a scroll event.
+   */
+  private readonly syncScroll = (): void => {
+    const input = this.renderRoot.querySelector<HTMLInputElement>(".url input");
     const highlight = this.renderRoot.querySelector<HTMLElement>(".highlight");
-    if (highlight !== null) highlight.scrollLeft = (event.target as HTMLInputElement).scrollLeft;
+    if (input !== null && highlight !== null) highlight.scrollLeft = input.scrollLeft;
   };
+
+  /** Dragging a selection scrolls the input on its own: follow it every frame until the press ends. */
+  private readonly followWhileSelecting = (): void => {
+    let isPressed = true;
+    const follow = (): void => {
+      this.syncScroll();
+      if (isPressed) requestAnimationFrame(follow);
+    };
+    window.addEventListener(
+      "pointerup",
+      () => {
+        isPressed = false;
+        requestAnimationFrame(this.syncScroll);
+      },
+      { once: true },
+    );
+    requestAnimationFrame(follow);
+  };
+
+  /** A URL set from elsewhere (undo, another tab, a pasted cURL) may scroll the input too. */
+  protected override updated(): void {
+    this.syncScroll();
+  }
 }
 
 customElements.define("url-bar", UrlBar);

@@ -20,6 +20,9 @@ export const plusIcon = (): TemplateResult => icon(svg`<path d="M12 5v14M5 12h14
 export const saveIcon = (): TemplateResult =>
   icon(svg`<path d="M5 3h11l3 3v15H5z"></path><path d="M8 3v6h8V3"></path>`, 16);
 export const chevronDownIcon = (): TemplateResult => icon(svg`<path d="M6 9l6 6 6-6"></path>`, 12);
+export const chevronUpIcon = (): TemplateResult => icon(svg`<path d="M6 15l6-6 6 6"></path>`, 12);
+export const searchIcon = (): TemplateResult =>
+  icon(svg`<circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path>`, 13);
 export const chevronRightIcon = (): TemplateResult => icon(svg`<path d="M9 6l6 6-6 6"></path>`, 12);
 export const folderIcon = (): TemplateResult => icon(svg`<path d="M3 6h6l2 2h10v11H3z"></path>`, 16);
 export const closeIcon = (): TemplateResult => icon(svg`<path d="M6 6l12 12M18 6L6 18"></path>`, 12);

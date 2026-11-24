@@ -17,6 +17,8 @@ const pm = {
     replaceIn: (template) => String(template).replace(/\{\{([^{}]+)\}\}/g, (whole, name) => __lookUp(name.trim()) ?? whole),
   },
   request: __request(__in.request, __in.event === "prerequest"),
+  // Before sending: the request's URL as it will go out; after: the response's final URL.
+  cookies: __cookieList(() => __in.cookieUrl ?? pm.variables.replaceIn(pm.request.url.toString())),
   response: __response(__in.response),
   expect: (subject) => new __Assertion(subject),
   test: (name, check) => {

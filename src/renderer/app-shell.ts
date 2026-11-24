@@ -23,6 +23,7 @@ import {
   startApp,
   workspaces,
 } from "./stores/workspace-store";
+import { installRequestUndoKeys } from "./features/requests/request-undo-keys";
 
 /**
  * Root component. The open workspace; or, before one is open: the welcome screen (no workspaces yet,
@@ -67,6 +68,7 @@ export class AppShell extends LitElement {
     if (!document.querySelector("confirm-dialog"))
       document.body.append(document.createElement("confirm-dialog"));
     if (!document.querySelector("variable-popover")) installVariableAssist();
+    installRequestUndoKeys();
     return root;
   }
 }

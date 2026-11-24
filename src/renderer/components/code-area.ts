@@ -1,16 +1,7 @@
-import {
-  defaultKeymap,
-  history,
-  historyKeymap,
-  indentWithTab,
-  toggleLineComment,
-} from "@codemirror/commands";
+import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { completionExtension, type CompletionConfig } from "./editor-completions";
 
 export type { CompletionConfig } from "./editor-completions";
-import { javascript } from "@codemirror/lang-javascript";
-import { json } from "@codemirror/lang-json";
-import { xml } from "@codemirror/lang-xml";
 import {
   bracketMatching,
   foldGutter,
@@ -19,6 +10,8 @@ import {
   syntaxHighlighting,
   unfoldAll,
 } from "@codemirror/language";
+import { search, searchKeymap } from "@codemirror/search";
+import { createFindPanel } from "./find-panel";
 import { Compartment, EditorState, type Extension, type StateEffect } from "@codemirror/state";
 import {
   drawSelection,
@@ -34,17 +27,26 @@ import { knownVariableNames } from "../stores/environment-store";
 import { codeEditorTheme, codeHighlightStyle } from "./code-editor-theme";
 import { jsonChecker } from "./json-check";
 import { foldEverythingInside } from "./fold-all";
-import { autoClose } from "./auto-close";
 import { appSettings } from "../stores/app-settings-store";
 import { refreshVariableColours, variableHighlighter } from "./variable-decorations";
+import { editorStateFor, keepEditorState } from "./editor-history";
+import { autoCloseFromSettings, commentExtension, languageExtension } from "./code-area-extensions";
 
-export type CodeLanguage = "json" | "xml" | "javascript" | "text";
+export type { CodeLanguage } from "./code-area-extensions";
+import type { CodeLanguage } from "./code-area-extensions";
 
-/** Cmd/Ctrl+Enter sends the request in ReqLab, so CodeMirror must not take it for "insert line". */
+/** Only finding: Cmd/Ctrl+F, F3 / Cmd/Ctrl+G (and with Shift), Escape. Not go-to-line or multi-select. */
+const FIND_KEYS = new Set(["Mod-f", "F3", "Mod-g", "Escape"]);
+
+/**
+ * Cmd/Ctrl+Enter sends the request in ReqLab, so CodeMirror must not take it for "insert line".
+ * Cmd/Ctrl+F finds in the body (Enter / Shift+Enter or F3 for the next / previous match, Escape closes).
+ */
 const editorKeymap = [
   ...defaultKeymap.filter((binding) => binding.key !== "Mod-Enter"),
   ...historyKeymap,
   ...foldKeymap,
+  ...searchKeymap.filter((binding) => FIND_KEYS.has(binding.key ?? "")),
   indentWithTab,
 ];
 
@@ -56,6 +58,8 @@ const BASE_EXTENSIONS: Extension[] = [
   highlightActiveLineGutter(),
   drawSelection(),
   history(),
+  // A small find bar above the text (find-panel.ts).
+  search({ top: true, createPanel: createFindPanel }),
   bracketMatching(),
   indentOnInput(),
   EditorState.tabSize.of(2),
@@ -91,6 +95,7 @@ export class CodeArea extends LitElement {
     lineComment: { attribute: false },
     completions: { attribute: false },
     extras: { attribute: false },
+    historyKey: { attribute: false },
     onChange: { attribute: false },
   };
 
@@ -107,6 +112,8 @@ export class CodeArea extends LitElement {
   declare completions: CompletionConfig | undefined;
   /** More editor features for one use (e.g. request labels in scripts). */
   declare extras: Extension;
+  /** Keeps undo history when the editor is rebuilt or shows another tab (e.g. "tab-id:body"). */
+  declare historyKey: string | undefined;
   declare onChange: (value: string) => void;
   #view: EditorView | undefined;
   #stopWatchingNames: (() => void) | undefined;
@@ -132,6 +139,7 @@ export class CodeArea extends LitElement {
     this.lineComment = undefined;
     this.completions = undefined;
     this.extras = [];
+    this.historyKey = undefined;
     this.onChange = () => undefined;
   }
 
@@ -159,6 +167,8 @@ export class CodeArea extends LitElement {
   }
 
   override disconnectedCallback(): void {
+    if (this.#view !== undefined && this.historyKey !== undefined)
+      keepEditorState(this.historyKey, this.#view.state);
     this.#view?.destroy();
     this.#view = undefined;
     this.#stopWatchingNames?.();
@@ -173,6 +183,13 @@ export class CodeArea extends LitElement {
   protected override updated(changed: PropertyValues<this>): void {
     const view = this.#view;
     if (view === undefined) return;
+    // The same editor now shows another tab: keep the old tab's history, bring back this one's.
+    if (changed.has("historyKey")) {
+      const previous = changed.get("historyKey");
+      if (previous !== undefined) keepEditorState(previous, view.state);
+      view.setState(editorStateFor(this.historyKey, this.value, this.extensions()));
+      return;
+    }
     if (changed.has("value") && this.value !== view.state.doc.toString()) {
       view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: this.value } });
     }
@@ -210,7 +227,7 @@ export class CodeArea extends LitElement {
     this.#view = new EditorView({
       parent,
       root: this.renderRoot as ShadowRoot,
-      state: EditorState.create({ doc: this.value, extensions: this.extensions() }),
+      state: editorStateFor(this.historyKey, this.value, this.extensions()),
     });
   }
 
@@ -244,30 +261,6 @@ export class CodeArea extends LitElement {
   private labelExtension(): Extension {
     return [EditorView.contentAttributes.of({ "aria-label": this.label }), placeholder(this.placeholder)];
   }
-}
-
-/**
- * Cmd/Ctrl+/ comments or uncomments the current or selected lines with `marker`.
- * (The default keymap binds Mod-/; Ctrl-/ is added so it also works with Ctrl on macOS.)
- */
-function commentExtension(marker: string | undefined): Extension {
-  if (marker === undefined) return [];
-  return [
-    EditorState.languageData.of(() => [{ commentTokens: { line: marker } }]),
-    keymap.of([{ key: "Ctrl-/", run: toggleLineComment }]),
-  ];
-}
-
-function languageExtension(language: CodeLanguage): Extension {
-  if (language === "json") return json();
-  if (language === "javascript") return javascript();
-  return language === "xml" ? xml() : [];
-}
-
-/** Settings › Editor: auto-close brackets / quotes. */
-function autoCloseFromSettings(): Extension {
-  const { closeBrackets, closeQuotes } = appSettings.get();
-  return autoClose({ brackets: closeBrackets, quotes: closeQuotes });
 }
 
 customElements.define("code-area", CodeArea);

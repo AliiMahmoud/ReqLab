@@ -64,14 +64,30 @@
   --method-delete: #b3261e;
   --method-other: #545c69;
 
-  --syntax-key: #2a62c9;
   /* macOS-style folder: a darker back with the tab, a lighter front, a soft top highlight. */
   --folder-back: #4f9fe6;
   --folder-front: #7cbef4;
   --folder-shine: rgb(255 255 255 / 45%);
-  --syntax-string: #17723a;
-  --syntax-literal: #8a3fb0;
-  --syntax-punctuation: #2a303a;
+  /* Code colours: VS Code's Default Light+. */
+  --syntax-key: #0451a5;
+  --syntax-string: #a31515;
+  --syntax-number: #098658;
+  --syntax-literal: #0000ff;
+  --syntax-keyword: #af00db;
+  --syntax-function: #795e26;
+  --syntax-type: #267f99;
+  --syntax-variable: #001080;
+  --syntax-comment: #008000;
+  --syntax-regexp: #811f3f;
+  --syntax-tag: #800000;
+  --syntax-attribute: #e50000;
+  --syntax-punctuation: #000000;
+  /* Editor selection and find matches, as in VS Code. */
+  --editor-selection: #add6ff;
+  --editor-find-match: rgb(234 92 0 / 33%);
+  --editor-find-current: #a8ac94;
+  --editor-bracket: rgb(0 100 0 / 10%);
+  --editor-bracket-border: #b9b9b9;
   --syntax-selection: rgb(240 160 48 / 28%);
   /* Popups: dropdowns, menus, cards. Each theme can make them softer or deeper. */
   --shadow-popup: 0 12px 32px rgb(0 0 0 / 16%);
@@ -123,13 +139,29 @@
     --method-patch: #d7a6f2;
     --method-delete: #f28b82;
     --method-other: #9aa3b2;
-    --syntax-key: #8fb8f0;
     --folder-back: #3a84cc;
     --folder-front: #5ca6e8;
     --folder-shine: rgb(255 255 255 / 22%);
-    --syntax-string: #a9d99b;
-    --syntax-literal: #d7a6f2;
-    --syntax-punctuation: #d5d9e0;
+    /* Code colours: VS Code's Default Dark+. */
+    --syntax-key: #9cdcfe;
+    --syntax-string: #ce9178;
+    --syntax-number: #b5cea8;
+    --syntax-literal: #569cd6;
+    --syntax-keyword: #c586c0;
+    --syntax-function: #dcdcaa;
+    --syntax-type: #4ec9b0;
+    --syntax-variable: #9cdcfe;
+    --syntax-comment: #6a9955;
+    --syntax-regexp: #d16969;
+    --syntax-tag: #569cd6;
+    --syntax-attribute: #9cdcfe;
+    --syntax-punctuation: #d4d4d4;
+    /* Editor selection and find matches, as in VS Code. */
+    --editor-selection: #264f78;
+    --editor-find-match: rgb(234 92 0 / 33%);
+    --editor-find-current: #9e6a03;
+    --editor-bracket: rgb(0 100 0 / 10%);
+    --editor-bracket-border: #888888;
     --syntax-selection: rgb(240 160 48 / 22%);
   }
 }
@@ -178,13 +210,29 @@
   --method-patch: #d7a6f2;
   --method-delete: #f28b82;
   --method-other: #9aa3b2;
-  --syntax-key: #8fb8f0;
   --folder-back: #3a84cc;
   --folder-front: #5ca6e8;
   --folder-shine: rgb(255 255 255 / 22%);
-  --syntax-string: #a9d99b;
-  --syntax-literal: #d7a6f2;
-  --syntax-punctuation: #d5d9e0;
+  /* Code colours: VS Code's Default Dark+. */
+  --syntax-key: #9cdcfe;
+  --syntax-string: #ce9178;
+  --syntax-number: #b5cea8;
+  --syntax-literal: #569cd6;
+  --syntax-keyword: #c586c0;
+  --syntax-function: #dcdcaa;
+  --syntax-type: #4ec9b0;
+  --syntax-variable: #9cdcfe;
+  --syntax-comment: #6a9955;
+  --syntax-regexp: #d16969;
+  --syntax-tag: #569cd6;
+  --syntax-attribute: #9cdcfe;
+  --syntax-punctuation: #d4d4d4;
+  /* Editor selection and find matches, as in VS Code. */
+  --editor-selection: #264f78;
+  --editor-find-match: rgb(234 92 0 / 33%);
+  --editor-find-current: #9e6a03;
+  --editor-bracket: rgb(0 100 0 / 10%);
+  --editor-bracket-border: #888888;
   --syntax-selection: rgb(240 160 48 / 22%);
 }
 

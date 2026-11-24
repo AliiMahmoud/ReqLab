@@ -113,10 +113,15 @@ export class RequestEditor extends LitElement {
 
   private renderScripts(): TemplateResult {
     const { id, draft } = this.tab;
+    // Typed in the script editors, which keep their own undo history.
     const change = (scripts: Scripts): void => {
-      updateDraft(id, { scripts });
+      updateDraft(id, { scripts }, { isUndoable: false });
     };
-    return html`<scripts-editor .scripts=${draft.scripts} .onChange=${change}></scripts-editor>`;
+    return html`<scripts-editor
+      .historyKey=${id}
+      .scripts=${draft.scripts}
+      .onChange=${change}
+    ></scripts-editor>`;
   }
 
   /** Query Params, and Path Variables when the URL has ":name" segments (as in Postman). */
@@ -149,8 +154,8 @@ export class RequestEditor extends LitElement {
     const changeHeaders = (headers: KeyValue[]): void => {
       updateDraft(id, { headers });
     };
-    const changeBody = (change: BodyChange): void => {
-      updateDraft(id, change);
+    const changeBody = ({ isCodeEdit = false, ...change }: BodyChange): void => {
+      updateDraft(id, change, { isUndoable: !isCodeEdit });
     };
     if (section === "params") return this.renderParams(changeParams);
     if (section === "headers") {
@@ -161,6 +166,7 @@ export class RequestEditor extends LitElement {
       ></key-value-table>`;
     }
     return html`<body-editor
+      .historyKey=${id}
       .body=${draft.body}
       .otherBodies=${draft.otherBodies ?? []}
       .onChange=${changeBody}

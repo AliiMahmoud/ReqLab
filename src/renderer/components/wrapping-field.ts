@@ -92,6 +92,8 @@ export const wrappingFieldStyles = css`
     white-space: pre;
   }
   .wrapping-field > .variable-overlay {
+    /* Like the text box, show text only inside the side padding (scrolled, the padding shows it too). */
+    clip-path: inset(0 var(--wrap-padding-x, 10px));
     align-items: flex-start;
     padding: var(--wrap-padding-y, 7px) var(--wrap-padding-x, 10px);
     line-height: calc(16px * var(--text-scale));

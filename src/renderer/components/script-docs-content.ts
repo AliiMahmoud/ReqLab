@@ -1,5 +1,6 @@
 import { html, type TemplateResult } from "lit";
 import { EXPECT_WORDS, SCRIPT_API } from "./script-api-entries";
+import { renderCookiesGuide } from "./script-docs-cookies";
 import { renderRunRequestGuide } from "./script-docs-run-request";
 
 /** Ready-to-use examples, shown with a short title. */
@@ -21,6 +22,10 @@ const EXAMPLES: [string, string][] = [
     'const login = await pm.execution.runRequest("<request id from its ID button>");\npm.request.headers.upsert({ key: "Authorization", value: "Bearer " + login.json().token });',
   ],
   [
+    "Keep the session cookie a login set (post-response)",
+    'pm.environment.set("sessionId", pm.cookies.get("session"));',
+  ],
+  [
     "A value for this send only",
     'pm.variables.set("page", "2"); // {{page}} in the URL, headers or body uses it',
   ],
@@ -34,6 +39,7 @@ const SECTIONS: [string, string][] = [
   ["Variables", "pm.environment, pm.collectionVariables, pm.globals, pm.variables"],
   ["Request", "pm.request"],
   ["Response", "pm.response"],
+  ["Cookies", "pm.cookies"],
   ["Tests", "pm.test, pm.expect"],
   ["Running other requests", "pm.execution"],
   ["Other", "pm.info, console"],
@@ -42,7 +48,8 @@ const SECTIONS: [string, string][] = [
 /** The help window's text: how scripts run, the pm API by section, assertions and examples. */
 export function renderScriptDocs(): TemplateResult {
   return html`${renderHowScriptsRun()}
-    ${SECTIONS.map(([title, roots]) => renderSection(title, roots.split(", ")))} ${renderRunRequestGuide()}
+    ${SECTIONS.map(([title, roots]) => renderSection(title, roots.split(", ")))} ${renderCookiesGuide()}
+    ${renderRunRequestGuide()}
     <section>
       <h3>pm.expect(value)</h3>
       <p>

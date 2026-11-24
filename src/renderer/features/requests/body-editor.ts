@@ -25,6 +25,8 @@ const BODY_TYPE_LABELS: [BodyType, string][] = [
 export interface BodyChange {
   body: RequestBody;
   otherBodies?: RequestBody[];
+  /** Typed in a code editor, which keeps its own undo history (the request's history skips it). */
+  isCodeEdit?: boolean;
 }
 
 /**
@@ -36,11 +38,14 @@ export class BodyEditor extends LitElement {
   static override properties = {
     body: { attribute: false },
     otherBodies: { attribute: false },
+    historyKey: { attribute: false },
     onChange: { attribute: false },
   };
 
   declare body: RequestBody;
   declare otherBodies: RequestBody[];
+  /** The tab's key, so the code editors keep their undo history (see code-area). */
+  declare historyKey: string | undefined;
   declare onChange: (change: BodyChange) => void;
 
   constructor() {
@@ -122,10 +127,11 @@ export class BodyEditor extends LitElement {
 
   private renderTextEditor(body: Extract<RequestBody, { type: "json" | "raw" }>): TemplateResult {
     const changeText = (text: string): void => {
-      this.onChange({ body: { ...body, text } });
+      this.onChange({ body: { ...body, text }, isCodeEdit: true });
     };
     return html`${body.type === "raw" ? this.renderContentTypePicker(body) : undefined}
       <code-area
+        .historyKey=${this.keyFor("body")}
         .value=${body.text}
         .label=${"Request body"}
         .language=${this.editorLanguage()}
@@ -154,26 +160,32 @@ export class BodyEditor extends LitElement {
   private renderGraphqlEditor(body: Extract<RequestBody, { type: "graphql" }>): TemplateResult {
     return html`
       <code-area
+        .historyKey=${this.keyFor("graphql-query")}
         .value=${body.query}
         .label=${"GraphQL query"}
         .wrap=${isEditorWrapped.get()}
         .placeholder=${"query { … }"}
         .onChange=${(query: string) => {
-          this.onChange({ body: { ...body, query } });
+          this.onChange({ body: { ...body, query }, isCodeEdit: true });
         }}
       ></code-area>
       <p class="chips">Variables (JSON)</p>
       <code-area
+        .historyKey=${this.keyFor("graphql-variables")}
         .value=${body.variables}
         .label=${"GraphQL variables"}
         .language=${"json"}
         .wrap=${isEditorWrapped.get()}
         .placeholder=${"{ }"}
         .onChange=${(variables: string) => {
-          this.onChange({ body: { ...body, variables } });
+          this.onChange({ body: { ...body, variables }, isCodeEdit: true });
         }}
       ></code-area>
     `;
+  }
+
+  private keyFor(editor: string): string | undefined {
+    return this.historyKey === undefined ? undefined : `${this.historyKey}:${editor}`;
   }
 
   private switchType(type: BodyType): void {

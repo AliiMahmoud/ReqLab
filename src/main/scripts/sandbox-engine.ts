@@ -5,6 +5,7 @@ import {
   type QuickJSRuntime,
   type QuickJSWASMModule,
 } from "quickjs-emscripten-core";
+import { PM_COOKIES_SOURCE } from "./sandbox-cookies";
 import { EXPECT_SOURCE } from "./sandbox-expect";
 import { PM_API_SOURCE } from "./sandbox-pm-api";
 import { PM_OBJECT_SOURCE } from "./sandbox-pm-object";
@@ -47,7 +48,7 @@ export async function runInEngine(
   try {
     setString(context, "__input", inputJson);
     exposeRunRequest(context, { runtime, runRequest, waits });
-    evaluate(context, PM_API_SOURCE + EXPECT_SOURCE + PM_OBJECT_SOURCE);
+    evaluate(context, PM_API_SOURCE + PM_COOKIES_SOURCE + EXPECT_SOURCE + PM_OBJECT_SOURCE);
     for (const script of scripts) await runOne({ context, runtime, waits, clock }, script);
     return JSON.parse(evaluate(context, "JSON.stringify(__output)")) as unknown;
   } finally {

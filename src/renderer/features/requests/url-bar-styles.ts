@@ -59,6 +59,8 @@ export const urlBarStyles = css`
     position: absolute;
     inset: 0;
     overflow: hidden;
+    /* Like the input, show text only inside the side padding (a scrolled box shows it in its padding too). */
+    clip-path: inset(0 12px);
     color: var(--color-text);
     pointer-events: none;
   }

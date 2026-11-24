@@ -1,5 +1,6 @@
 import type { VariableOwner } from "@shared/models/environment";
 import type { ScriptReport } from "@shared/models/script-report";
+import { cookiesForScripts, saveScriptCookieChanges } from "../cookies/script-cookies";
 import type { FinalResponse } from "../http/http-types";
 import type { RequestContext } from "../pipeline/request-context";
 import type { WorkspaceData } from "../workspaces/workspace-data";
@@ -31,6 +32,7 @@ export async function runScriptPhase(
   });
   const output = SandboxOutput.parse(raw);
   saveVariableChanges(data, context, output);
+  saveScriptCookieChanges(data.cookies(workspaceId), output.cookieChanges, new Date());
   return output;
 }
 
@@ -48,6 +50,9 @@ function buildInput(data: WorkspaceData, context: RequestContext, phase: Phase):
     local: Object.fromEntries(context.localVariables ?? []),
     request: context.definition,
     response: context.response === undefined ? null : responseForScripts(context.response),
+    cookies: cookiesForScripts(data.cookies(workspaceId), new Date()),
+    // After the response, pm.cookies follows its final URL (after redirects).
+    cookieUrl: context.response?.url.href ?? null,
   };
 }
 

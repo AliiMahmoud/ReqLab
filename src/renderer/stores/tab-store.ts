@@ -11,6 +11,7 @@ import { callApi, showNotice } from "./notice-store";
 import { createTab, hasUnsavedChanges, type ContainerSection, type RequestTab } from "./request-tab";
 import { fromPersistedTab, toPersistedTab } from "./tab-snapshot";
 import { signal } from "./signal";
+import { forgetDraftHistory, recordDraftEdit } from "./draft-history";
 
 export const tabs = signal<RequestTab[]>([]);
 export const activeTabId = signal<string | undefined>(undefined);
@@ -27,9 +28,19 @@ export function updateTab(tabId: string, change: Partial<RequestTab>): void {
   tabs.set(tabs.get().map((tab) => (tab.id === tabId ? { ...tab, ...change } : tab)));
 }
 
-export function updateDraft(tabId: string, change: Partial<RequestDefinition>): void {
+/**
+ * Changes a tab's request. The change is an undo step of the tab (Cmd/Ctrl+Z), unless it was typed
+ * in a code editor, which keeps its own undo history (`isUndoable: false`).
+ */
+export function updateDraft(
+  tabId: string,
+  change: Partial<RequestDefinition>,
+  { isUndoable = true }: { isUndoable?: boolean } = {},
+): void {
   const tab = findTab(tabId);
-  if (tab !== undefined) updateTab(tabId, { draft: { ...tab.draft, ...change } });
+  if (tab === undefined) return;
+  if (isUndoable) recordDraftEdit(tabId, tab.draft, change);
+  updateTab(tabId, { draft: { ...tab.draft, ...change } });
 }
 
 export async function openSavedRequest(workspaceId: string, itemId: string): Promise<void> {
@@ -90,7 +101,8 @@ function removeTab(tab: RequestTab): void {
   const index = tabs.get().findIndex((other) => other.id === tabId);
   if (index === -1) return;
   closedTabs.push({ tab: { ...tab, sendingRequestId: undefined }, index });
-  if (closedTabs.length > MAX_CLOSED_TABS) closedTabs.shift();
+  // Reopen Closed Tab brings the undo history back; a tab that falls off the list loses it.
+  if (closedTabs.length > MAX_CLOSED_TABS) forgetDraftHistory(closedTabs.shift()?.tab.id ?? "");
   const remaining = tabs.get().filter((other) => other.id !== tabId);
   tabs.set(remaining);
   if (activeTabId.get() === tabId) activeTabId.set(remaining[Math.min(index, remaining.length - 1)]?.id);

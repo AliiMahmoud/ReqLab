@@ -3,6 +3,7 @@ import { closeIcon } from "./icons";
 import { renderScriptDocs } from "./script-docs-content";
 import { formStyles } from "./shared-styles";
 import { showModal } from "./modal-dialog";
+import { clearDocsHighlight, filterDocs } from "./script-docs-search";
 
 /** The scripts' "?" button and the reference window it opens (the pm API, assertions, examples). */
 export class ScriptDocs extends LitElement {
@@ -47,7 +48,29 @@ export class ScriptDocs extends LitElement {
         border-bottom: 1px solid var(--color-border);
       }
       header strong {
+        flex: 1;
         font-size: calc(15px * var(--text-scale));
+      }
+      .search {
+        width: min(260px, 40%);
+        margin-right: var(--space-2);
+        padding: 5px 10px;
+        font-size: calc(12.5px * var(--text-scale));
+      }
+      .search:focus-visible {
+        outline: none;
+        border-color: var(--color-accent);
+      }
+      [hidden] {
+        display: none !important;
+      }
+      ::highlight(script-docs-search) {
+        background-color: var(--editor-find-match);
+        color: inherit;
+      }
+      .no-matches {
+        margin: 18px 0;
+        color: var(--color-text-muted);
       }
       .close {
         width: 28px;
@@ -125,16 +148,42 @@ export class ScriptDocs extends LitElement {
       >
         ?
       </button>
-      <dialog aria-label="Scripts help">
+      <dialog aria-label="Scripts help" @keydown=${this.focusSearch} @close=${clearDocsHighlight}>
         <header>
           <strong>Scripts: the pm API</strong>
+          <input
+            class="search"
+            type="search"
+            aria-label="Search the scripts help"
+            placeholder="Search, e.g. cookies, environment, expect"
+            spellcheck="false"
+            @input=${this.search}
+          />
           <button class="close" aria-label="Close help" title="Close" @click=${this.close}>
             ${closeIcon()}
           </button>
         </header>
-        <div class="content" tabindex="-1" autofocus>${renderScriptDocs()}</div>
+        <div class="content" tabindex="-1" autofocus>
+          <p class="no-matches" hidden>No matches.</p>
+          ${renderScriptDocs()}
+        </div>
       </dialog>`;
   }
+
+  /** Shows only what matches, highlighted; Cmd/Ctrl+F in the window jumps to the field. */
+  private readonly search = (event: Event): void => {
+    const content = this.renderRoot.querySelector<HTMLElement>(".content");
+    const noMatches = this.renderRoot.querySelector<HTMLElement>(".no-matches");
+    if (content === null || noMatches === null) return;
+    const isAnyShown = filterDocs(content, (event.target as HTMLInputElement).value);
+    noMatches.hidden = isAnyShown;
+  };
+
+  private readonly focusSearch = (event: KeyboardEvent): void => {
+    if (event.key.toLowerCase() !== "f" || !(event.metaKey || event.ctrlKey)) return;
+    event.preventDefault();
+    this.renderRoot.querySelector<HTMLInputElement>(".search")?.select();
+  };
 
   private readonly open = (): void => {
     // Focus starts on the text (autofocus): arrow keys scroll it, and no ring lands on the close button.

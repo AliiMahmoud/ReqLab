@@ -44,6 +44,7 @@
 
 - Pre-request and post-response scripts on requests, folders and collections, with the widely used `pm` script API: variables, `pm.request`, `pm.response`, `pm.test`, `pm.expect` and `console.log`.
 - `pm.execution.runRequest(id)` runs another saved request (for example, a login) from a script.
+- `pm.cookies` reads the cookies that go with the request (`get`, `has`, `toObject` …), and `pm.cookies.jar()` reads and changes the cookie jar for any URL (`get`, `getAll`, `set`, `unset`, `clear`).
 - An editor with JavaScript highlighting and autocomplete, a built-in API reference, and a Tests tab with results and console output.
 - Scripts run in QuickJS, a separate JavaScript engine, on a worker thread: no files, no network, and limits of 64 MB and 10 seconds per run.
 

@@ -1,3 +1,5 @@
+import { activeTabId } from "../../stores/tab-store";
+import { mainView } from "../../stores/view-store";
 import { caretPoint, popoverTop, type TextField } from "./field-geometry";
 import { insertVariable, openVariableAtCaret, tokenAtPoint } from "./variable-text";
 import { VariablePopover } from "./variable-popover";
@@ -35,6 +37,16 @@ export function installVariableAssist(): void {
   listen("pointerdown", (event) => {
     assist.onPointerDown(event);
   });
+  closeOnContextChange(assist);
+}
+
+/** Another request, tab or page: what was suggested or shown belongs to the old one. */
+function closeOnContextChange(assist: VariableAssist): void {
+  const close = (): void => {
+    assist.closeAll();
+  };
+  activeTabId.subscribe(close);
+  mainView.subscribe(close);
 }
 
 function variableField(event: Event): TextField | undefined {
@@ -110,7 +122,11 @@ class VariableAssist {
 
   /** A click outside the card closes it. */
   onPointerDown(event: PointerEvent): void {
-    if (this.popover.mode === "details" && !event.composedPath().includes(this.popover)) this.popover.hide();
+    const path = event.composedPath();
+    if (path.includes(this.popover)) return;
+    if (this.popover.mode === "details") this.popover.hide();
+    // Suggestions stay only while pressing inside the field they belong to.
+    if (this.#suggestingIn !== undefined && !path.includes(this.#suggestingIn)) this.closeSuggestions();
   }
 
   /** The card stays while it is being edited (focus inside), else it goes shortly after the mouse leaves. */
@@ -125,6 +141,14 @@ class VariableAssist {
   private cancelLeave(): void {
     clearTimeout(this.#leaveTimer);
     this.#leaveTimer = undefined;
+  }
+
+  /** Hides the suggestions and the variable card. */
+  closeAll(): void {
+    this.closeSuggestions();
+    this.cancelLeave();
+    clearTimeout(this.#hoverTimer);
+    this.popover.hide();
   }
 
   private closeSuggestions(): void {

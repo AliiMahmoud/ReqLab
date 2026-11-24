@@ -7,6 +7,28 @@ const Row = z.object({
   isEnabled: z.boolean(),
 });
 
+const CookieKey = z.object({
+  domain: z.string().max(255),
+  path: z.string().max(1_024),
+  name: z.string().max(4_096),
+});
+
+/** pm.cookies.jar() changes, saved to the workspace's jar after the scripts (checked again there). */
+const CookieChange = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("set"),
+    cookie: CookieKey.extend({
+      value: z.string().max(8_192),
+      expires: z.string().nullable(),
+      secure: z.boolean(),
+      httpOnly: z.boolean(),
+      hostOnly: z.boolean(),
+    }),
+  }),
+  z.object({ action: z.literal("delete"), cookie: CookieKey }),
+]);
+export type CookieChange = z.infer<typeof CookieChange>;
+
 /** What the sandbox hands back. It ran untrusted code, so every field is checked and capped. */
 export const SandboxOutput = z.object({
   scopes: z.object({
@@ -15,6 +37,7 @@ export const SandboxOutput = z.object({
     globals: z.array(Row).max(5_000).optional(),
   }),
   local: z.record(z.string().max(MAX_NAME_LENGTH), z.string().max(MAX_VALUE_LENGTH)),
+  cookieChanges: z.array(CookieChange).max(500).default([]),
   /** The request as a pre-request script left it (checked again as a RequestDefinition). */
   request: z.unknown(),
   tests: z

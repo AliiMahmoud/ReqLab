@@ -86,11 +86,14 @@ export class ScriptsEditor extends LitElement {
   `;
   static override properties = {
     scripts: { attribute: false },
+    historyKey: { attribute: false },
     onChange: { attribute: false },
     phase: { state: true },
   };
 
   declare scripts: Scripts | undefined;
+  /** The tab's key, so each script keeps its undo history (see code-area). */
+  declare historyKey: string | undefined;
   declare onChange: (scripts: Scripts) => void;
   declare phase: Phase;
 
@@ -114,6 +117,7 @@ export class ScriptsEditor extends LitElement {
         <script-docs></script-docs>
       </div>
       <code-area
+        .historyKey=${this.historyKey === undefined ? undefined : `${this.historyKey}:${this.phase}`}
         .value=${scripts[this.phase]}
         .label=${`${current?.label ?? ""} script`}
         .placeholder=${current?.placeholder ?? ""}
