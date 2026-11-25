@@ -1,10 +1,11 @@
 import type { ResponseView, SendRequestInput } from "@shared/models/http-exchange";
 import type { NetworkLogView } from "@shared/models/network-log";
 import type { RequestDefinition } from "@shared/models/request";
-import type { FinalResponse, PreparedRequest } from "../http/http-types";
+import { findHeader, type FinalResponse, type PreparedRequest } from "../http/http-types";
 import { toCurl } from "../http/to-curl";
 import { NetworkLog } from "../http/network-log";
 import { RecentNetworkLogs } from "./recent-network-logs";
+import { RecentResponseBodies, type KeptBody } from "./recent-response-bodies";
 import type { OAuth2Service } from "../auth/oauth2/oauth2-service";
 import type { NetworkSettingsStore } from "../network/network-settings-store";
 import type { RequestSettingsStore } from "../network/request-settings-store";
@@ -41,6 +42,7 @@ interface SenderServices {
 export class RequestSender {
   readonly #inFlight = new Map<string, AbortController>();
   readonly #logs = new RecentNetworkLogs();
+  readonly #bodies = new RecentResponseBodies();
   readonly #pipeline: RequestPipeline;
   /** The same steps up to the network: what "Copy as cURL" runs. */
   readonly #preparation: RequestPipeline;
@@ -116,6 +118,7 @@ export class RequestSender {
     };
     try {
       await this.#pipeline.run(context);
+      this.rememberBody(context);
       return this.buildView(context);
     } catch (error) {
       this.recordFailure(context);
@@ -129,6 +132,22 @@ export class RequestSender {
 
   cancel(requestId: string): void {
     this.#inFlight.get(requestId)?.abort();
+  }
+
+  /** A recent response's body exactly as received (the response's Copy / Download). */
+  getBody(requestId: string): KeptBody | undefined {
+    return this.#bodies.get(requestId);
+  }
+
+  private rememberBody(context: RequestContext): void {
+    const response = context.response;
+    if (response === undefined) return;
+    const masker = context.scopes?.masker;
+    this.#bodies.remember(context.input.requestId, {
+      bytes: response.body,
+      contentType: findHeader(response.headers, "content-type") ?? "",
+      containsSecret: masker?.containsSecret(response.body.toString("utf8")) ?? false,
+    });
   }
 
   /** The masked network log of a recent send, for the Log button; null once forgotten. */

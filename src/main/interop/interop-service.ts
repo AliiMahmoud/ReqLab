@@ -1,6 +1,6 @@
+import { safeFileName, showSaveDialog } from "../files/save-dialog";
 import { writeFile } from "node:fs/promises";
 import { basename } from "node:path";
-import { BrowserWindow, dialog, type SaveDialogOptions } from "electron";
 import type {
   ChosenImport,
   ExportWorkspaceInput,
@@ -69,7 +69,7 @@ export class InteropService {
       workspaceName: workspace.name,
       includeEnvironments: input.includeEnvironments,
     });
-    const path = await showSaveDialog(`${safeFileName(workspace.name)}.reqlab`, {
+    const path = await showSaveDialog("Export", `${safeFileName(workspace.name)}.reqlab`, {
       name: "ReqLab bundle",
       extensions: ["reqlab"],
     });
@@ -95,7 +95,10 @@ export class InteropService {
     this.findWorkspace(input.workspaceId);
     const document = exportPostmanCollection(this.data, input.workspaceId, input.collectionId);
     const fileName = `${safeFileName(document.info.name)}.collection.json`;
-    const path = await showSaveDialog(fileName, { name: "Collection (JSON)", extensions: ["json"] });
+    const path = await showSaveDialog("Export", fileName, {
+      name: "Collection (JSON)",
+      extensions: ["json"],
+    });
     if (path === undefined) return null;
     // Postman writes its exports indented with tabs.
     await writeFile(path, JSON.stringify(document, null, "\t"), { mode: 0o600 });
@@ -113,7 +116,7 @@ export class InteropService {
     const name = isOne
       ? `${safeFileName(only.info.name)}.collection.json`
       : `${String(collections.length)} collections.json`;
-    const path = await showSaveDialog(name, { name: "Collections (JSON)", extensions: ["json"] });
+    const path = await showSaveDialog("Export", name, { name: "Collections (JSON)", extensions: ["json"] });
     if (path === undefined) return null;
     await writeFile(path, JSON.stringify(document, null, "\t"), { mode: 0o600 });
     return { fileName: basename(path) };
@@ -141,22 +144,4 @@ async function openAnyBundle(bytes: Buffer, passphrase: string | undefined): Pro
   if (hasMagic(bytes, PLAIN_BUNDLE_MAGIC)) return readPlainBundle(bytes);
   if (passphrase === undefined || passphrase === "") throw new ImportFailed("Enter the bundle's passphrase.");
   return openBundle(bytes, passphrase);
-}
-
-/** A name usable as a file name on every platform. */
-function safeFileName(name: string): string {
-  return name.replace(/[\\/:*?"<>|]/g, "_");
-}
-
-async function showSaveDialog(
-  defaultName: string,
-  filter: { name: string; extensions: string[] },
-): Promise<string | undefined> {
-  const options: SaveDialogOptions = { title: "Export", defaultPath: defaultName, filters: [filter] };
-  const window = BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0];
-  const result =
-    window === undefined
-      ? await dialog.showSaveDialog(options)
-      : await dialog.showSaveDialog(window, options);
-  return result.canceled ? undefined : result.filePath;
 }

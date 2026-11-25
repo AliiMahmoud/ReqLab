@@ -1,9 +1,11 @@
 import type { IpcRouter } from "./ipc-router";
+import { registerResponseBodyHandlers } from "./register-response-body-handlers";
 import type { IpcServices } from "./ipc-services";
 
 export function registerHttpHandlers(router: IpcRouter, services: IpcServices): void {
   const { data, sender, clipboard } = services;
   registerNetworkLogHandlers(router, services);
+  registerResponseBodyHandlers(router, services);
   router.handle("http:send", (input) => sender.send(input));
   router.handle("http:copy-as-curl", async (input) => {
     const { curl, containsSecrets } = await sender.buildCurl(input);

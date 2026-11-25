@@ -1,6 +1,10 @@
 import type { HeaderList } from "./http-types";
 import { REDACTED, SENSITIVE_NAME } from "./sensitive-names";
 
+/** What decoding puts in place of bytes that are not valid UTF-8. */
+const REPLACEMENT_CHARACTER = String.fromCharCode(0xfffd);
+const NUL = String.fromCharCode(0);
+
 /** Bodies longer than this are cut in the log; the full size is still given. */
 const MAX_BODY_CHARS = 10_000;
 
@@ -30,7 +34,8 @@ export function urlForLog(url: URL): string {
 export function bodyForLog(body: Buffer | undefined): string | undefined {
   if (body === undefined || body.length === 0) return undefined;
   const text = body.toString("utf8");
-  if (text.includes("\u0000") || text.includes("�")) return `<binary, ${String(body.length)} bytes>`;
+  if (text.includes(NUL) || text.includes(REPLACEMENT_CHARACTER))
+    return `<binary, ${String(body.length)} bytes>`;
   if (text.length <= MAX_BODY_CHARS) return text;
   return `${text.slice(0, MAX_BODY_CHARS)}… <cut, ${String(body.length)} bytes in all>`;
 }

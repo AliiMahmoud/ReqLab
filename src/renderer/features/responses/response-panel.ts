@@ -5,31 +5,60 @@ import { withShortcut } from "../../components/shortcut-label";
 import { formStyles } from "../../components/shared-styles";
 import { watch } from "../../controllers/signal-watcher";
 import {
-  collapseResponse,
+  hideResponse,
   expandResponse,
   isResponseCollapsed,
-  toggleResponse,
+  isResponseFullScreen,
+  toggleResponseCollapsed,
 } from "../../stores/layout-store";
 import type { RequestTab, ResponseSection } from "../../stores/request-tab";
 import { updateTab } from "../../stores/tab-store";
 import { sectionTabsStyles } from "../requests/section-tabs-styles";
 import { formatBytes, formatMilliseconds, statusTone } from "./response-format";
 import { responseStyles } from "./response-styles";
+import { responseBarStyles } from "./response-bar-styles";
+import { fitOnOneLine } from "./fit-bar";
 import "./response-body";
 import "./timing-chart";
 import "./script-results";
 import "./network-log-dialog";
+import { installFullScreenEscape, renderFullScreenButton } from "./response-full-screen";
 
 /** The response of the active tab: status, body (pretty / raw / preview), headers and timing. */
 export class ResponsePanel extends LitElement {
-  static override styles = [formStyles, sectionTabsStyles, responseStyles];
+  static override styles = [formStyles, sectionTabsStyles, responseStyles, responseBarStyles];
   static override properties = { tab: { attribute: false } };
 
   declare tab: RequestTab;
+  /** Re-fits the title bar whenever the response's size changes (dragging, layout, window). */
+  readonly #resizes = new ResizeObserver(() => {
+    this.fitBar();
+  });
 
   constructor() {
     super();
-    watch(this, isResponseCollapsed);
+    watch(this, isResponseCollapsed, isResponseFullScreen);
+    installFullScreenEscape();
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this.#resizes.observe(this);
+  }
+
+  override disconnectedCallback(): void {
+    this.#resizes.disconnect();
+    super.disconnectedCallback();
+  }
+
+  protected override updated(): void {
+    this.fitBar();
+  }
+
+  /** Keeps the title bar on one line, stepping down as needed (fit-bar.ts). */
+  private fitBar(): void {
+    const bar = this.renderRoot.querySelector<HTMLElement>(".status-line");
+    if (bar !== null) fitOnOneLine(bar);
   }
 
   override render(): TemplateResult {
@@ -108,7 +137,7 @@ export class ResponsePanel extends LitElement {
         ${this.renderSectionTab("timing", "Timing")}
       </div>
       <div class="section-tabs">${this.renderLogButton("Log")}</div>
-      ${renderClose()}
+      ${renderFullScreenButton()} ${renderClose()}
     </div>`;
   }
 
@@ -179,21 +208,21 @@ function renderTitle(tab: RequestTab): TemplateResult {
     <button
       class="title"
       aria-expanded=${String(!isCollapsed)}
-      title=${withShortcut(isCollapsed ? "Show response" : "Hide response", "Mod+Shift+R")}
-      @click=${toggleResponse}
+      title=${isCollapsed ? "Unfold the response" : "Fold the response to this bar"}
+      @click=${toggleResponseCollapsed}
     >
-      <span class="chevron">${isCollapsed ? chevronRightIcon() : chevronDownIcon()}</span>Response
+      <span class="chevron">${isCollapsed ? chevronRightIcon() : chevronDownIcon()}</span
+      ><span class="title-text">Response</span>
     </button>`;
 }
 
-/** × on the right: closes the response panel down to its bar (sending, the chevron or the shortcut reopen it). */
-function renderClose(): TemplateResult | undefined {
-  if (isResponseCollapsed.get()) return undefined;
+/** × on the right: closes the response panel entirely (sending or the shortcut bring it back). */
+function renderClose(): TemplateResult {
   return html`<button
     class="close-panel"
     aria-label="Close response"
-    title=${withShortcut("Close response", "Mod+Shift+R")}
-    @click=${collapseResponse}
+    title=${withShortcut("Close response (sending shows it again)", "Mod+Shift+R")}
+    @click=${hideResponse}
   >
     ${closeIcon()}
   </button>`;
@@ -219,14 +248,18 @@ function testsLabel(response: ResponseView): string {
 
 /** Status, total time, size and redirects of the response. */
 function renderMetrics(response: ResponseView): TemplateResult {
-  return html`<span class="pill ${statusTone(response.status)}"
-      >${String(response.status)} ${response.statusText}</span
+  // Parts marked with a class step back when the response is narrow (response-styles.ts).
+  const summary = `${String(response.status)} ${response.statusText} · ${formatMilliseconds(response.timings.total)} · ${formatBytes(response.body.size)}`;
+  return html`<span class="pill ${statusTone(response.status)}" title=${summary}
+      >${String(response.status)}<span class="status-text"> ${response.statusText}</span></span
     >
     <span class="metric">${formatMilliseconds(response.timings.total)}</span>
-    <span class="metric">${formatBytes(response.body.size)}</span>
+    <span class="metric is-size">${formatBytes(response.body.size)}</span>
     ${
       response.redirectCount > 0
-        ? html`<span class="metric" title=${response.url}>${String(response.redirectCount)} redirects</span>`
+        ? html`<span class="metric is-redirects" title=${response.url}
+            >${String(response.redirectCount)} redirects</span
+          >`
         : undefined
     }`;
 }

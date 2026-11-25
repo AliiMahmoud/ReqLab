@@ -10,6 +10,8 @@ import { watch } from "../../controllers/signal-watcher";
 import { isBodyWrapped, toggleBodyWrap } from "../../stores/layout-store";
 import type { BodyView, RequestTab } from "../../stores/request-tab";
 import { updateTab } from "../../stores/tab-store";
+import { copyIcon, downloadIcon } from "../../components/icons";
+import { copyResponse, saveResponse } from "./response-body-actions";
 import { sectionTabsStyles } from "../requests/section-tabs-styles";
 import { createPreviewDocument } from "./preview-document";
 import "./response-image";
@@ -33,6 +35,16 @@ export class ResponseBody extends LitElement {
     sectionTabsStyles,
     responseStyles,
     css`
+      /* Copy / Download: small icon buttons at the end of the toolbar. */
+      .chips .icon-action {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 6px;
+      }
+      .chips .icon-action:hover {
+        background: var(--color-selected);
+        color: var(--color-text);
+      }
       :host {
         flex: 1;
         display: flex;
@@ -82,7 +94,7 @@ export class ResponseBody extends LitElement {
       <span class="spacer"></span>
       ${body.isTruncated ? html`<span>Showing the first 20 MB of ${formatBytes(body.size)}</span>` : undefined}
       ${shown !== undefined && shown.language !== "text" ? this.renderFoldButtons() : undefined}
-      ${shown === undefined ? undefined : this.renderWrapButton()}
+      ${shown === undefined ? undefined : this.renderWrapButton()} ${this.renderBodyActions()}
     </div>`;
   }
 
@@ -126,6 +138,8 @@ export class ResponseBody extends LitElement {
     if (image === undefined) return html``;
     return html`<div class="chips" role="group" aria-label="Body view">
         ${this.renderViewButtons(body.contentType)}
+        <span class="spacer"></span>
+        ${this.renderBodyActions()}
       </div>
       <div class="content"><response-image .image=${image} .size=${body.size}></response-image></div>`;
   }
@@ -136,6 +150,32 @@ export class ResponseBody extends LitElement {
       <button title="Fold everything" @click=${() => editor()?.foldAll()}>Collapse all</button>
       <button title="Unfold everything" @click=${() => editor()?.unfoldAll()}>Expand all</button>
     `;
+  }
+
+  /** Copy / Download the body (see response-body-actions.ts), for every response, also restored ones. */
+  private renderBodyActions(): TemplateResult {
+    const copy = (): void => {
+      void copyResponse(this.tab, this.response);
+    };
+    const save = (): void => {
+      void saveResponse(this.tab, this.response);
+    };
+    return html`<button
+        class="icon-action"
+        title="Copy the response body"
+        aria-label="Copy the response body"
+        @click=${copy}
+      >
+        ${copyIcon()}
+      </button>
+      <button
+        class="icon-action"
+        title="Save the response body to a file"
+        aria-label="Download the response body"
+        @click=${save}
+      >
+        ${downloadIcon()}
+      </button>`;
   }
 
   private renderWrapButton(): TemplateResult {

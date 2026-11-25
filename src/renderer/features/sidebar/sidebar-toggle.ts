@@ -17,11 +17,17 @@ export function renderSidebarToggle(): TemplateResult {
 
 /** The sidebar's footer row, and the strip left behind while the panel is hidden. */
 export const sidebarToggleStyles = css`
+  /* Slim, and the same height as the bar under the request (request-area.ts). */
   .sidebar-footer {
     display: flex;
     align-items: center;
-    padding: 6px 8px;
+    padding: 3px 8px;
     border-top: 1px solid var(--color-border-soft);
+  }
+  .sidebar-footer .sidebar-toggle,
+  .sidebar-rail .sidebar-toggle {
+    width: 26px;
+    height: 26px;
   }
   .sidebar-rail {
     flex: 0 0 40px;
@@ -29,7 +35,7 @@ export const sidebarToggleStyles = css`
     flex-direction: column;
     justify-content: flex-end;
     align-items: center;
-    padding: 6px 0;
+    padding: 3px 0;
     border-right: 1px solid var(--color-border);
     background: var(--color-surface);
   }

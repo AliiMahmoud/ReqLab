@@ -8,6 +8,7 @@ import {
   EDITOR_FONTS,
   FONT_SIZES,
   LINE_HEIGHTS,
+  RESPONSE_POSITIONS,
   setAppSetting,
   type AppSettings,
 } from "../../stores/app-settings-store";
@@ -32,6 +33,7 @@ export function renderAppearanceRows(): TemplateResult {
   return html`${selectRow("App font", "The fonts installed on this computer.", { key: "appFont", value: settings.appFont, options: fontOptions(APP_FONTS, settings.appFont) })}
   ${selectRow("Font size", "The text everywhere, without zooming the layout.", { key: "fontSize", value: settings.fontSize, options: options(FONT_SIZES) })}
   ${selectRow("Line height", "How tall the rows of the requests list and of the tables are.", { key: "lineHeight", value: settings.lineHeight, options: lineHeightOptions() })}
+  ${selectRow("Response position", "Below the request, or beside it to see both at once.", { key: "responsePosition", value: settings.responsePosition, options: options(RESPONSE_POSITIONS) })}
   ${selectRow("App size", "Zooms the whole window: text, spacing and controls.", { key: "appScale", value: settings.appScale, options: options(APP_SCALES) })}`;
 }
 
@@ -55,7 +57,7 @@ function selectRow(
   label: string,
   hint: string,
   field: {
-    key: "appFont" | "appScale" | "fontSize" | "lineHeight" | "editorFont";
+    key: "appFont" | "appScale" | "fontSize" | "lineHeight" | "responsePosition" | "editorFont";
     value: string;
     options: SelectOption[];
   },

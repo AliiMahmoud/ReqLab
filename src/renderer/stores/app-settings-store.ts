@@ -26,6 +26,13 @@ export const LINE_HEIGHTS = {
   relaxed: { label: "Relaxed", rowHeight: 34 },
 } as const;
 
+/** Where the response sits: below the request (as before), or beside it, right or left. */
+export const RESPONSE_POSITIONS = {
+  below: "Below the request",
+  right: "Right of the request",
+  left: "Left of the request",
+} as const;
+
 export interface AppSettings {
   appFont: keyof typeof APP_FONTS;
   appScale: keyof typeof APP_SCALES;
@@ -38,6 +45,9 @@ export interface AppSettings {
   closeQuotes: boolean;
   /** Body form-data / x-www-form values may span several lines (Enter adds a line). */
   multilineValues: boolean;
+  responsePosition: keyof typeof RESPONSE_POSITIONS;
+  /** The tables' Description column (params, headers, form fields); hidden to save room. */
+  showDescriptions: boolean;
 }
 
 const DEFAULTS: AppSettings = {
@@ -50,6 +60,8 @@ const DEFAULTS: AppSettings = {
   closeBrackets: true,
   closeQuotes: true,
   multilineValues: false,
+  responsePosition: "below",
+  showDescriptions: false,
 };
 const STORAGE_KEY = "reqlab.appSettings";
 
@@ -80,29 +92,36 @@ function apply(): void {
 function readSaved(): AppSettings {
   try {
     const parsed: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
-    const saved =
-      typeof parsed === "object" && parsed !== null
-        ? (parsed as Partial<Record<keyof AppSettings, unknown>>)
-        : {};
+    const saved = typeof parsed === "object" && parsed !== null ? (parsed as Record<string, unknown>) : {};
     const pick = <K extends keyof AppSettings>(
       key: K,
       isValid: (value: unknown) => boolean,
     ): AppSettings[K] => (isValid(saved[key]) ? (saved[key] as AppSettings[K]) : DEFAULTS[key]);
-    const isBoolean = (value: unknown): boolean => typeof value === "boolean";
     return {
-      appFont: pick("appFont", (value) => typeof value === "string" && value in APP_FONTS),
-      appScale: pick("appScale", (value) => typeof value === "string" && value in APP_SCALES),
-      fontSize: pick("fontSize", (value) => typeof value === "string" && value in FONT_SIZES),
-      lineHeight: pick("lineHeight", (value) => typeof value === "string" && value in LINE_HEIGHTS),
+      appFont: pick("appFont", isOneOf(APP_FONTS)),
+      appScale: pick("appScale", isOneOf(APP_SCALES)),
+      fontSize: pick("fontSize", isOneOf(FONT_SIZES)),
+      lineHeight: pick("lineHeight", isOneOf(LINE_HEIGHTS)),
       autoSave: pick("autoSave", isBoolean),
-      editorFont: pick("editorFont", (value) => typeof value === "string" && value in EDITOR_FONTS),
+      editorFont: pick("editorFont", isOneOf(EDITOR_FONTS)),
       closeBrackets: pick("closeBrackets", isBoolean),
       closeQuotes: pick("closeQuotes", isBoolean),
       multilineValues: pick("multilineValues", isBoolean),
+      responsePosition: pick("responsePosition", isOneOf(RESPONSE_POSITIONS)),
+      showDescriptions: pick("showDescriptions", isBoolean),
     };
   } catch {
     return { ...DEFAULTS };
   }
+}
+
+function isBoolean(value: unknown): boolean {
+  return typeof value === "boolean";
+}
+
+/** A saved choice that is still one of the offered ones. */
+function isOneOf(choices: Record<string, unknown>): (value: unknown) => boolean {
+  return (value) => typeof value === "string" && value in choices;
 }
 
 apply();

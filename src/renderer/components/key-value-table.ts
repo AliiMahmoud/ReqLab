@@ -12,7 +12,7 @@ import {
   variableFieldStyles,
   variableOverlay,
 } from "./variable-highlight";
-import { appSettings } from "../stores/app-settings-store";
+import { appSettings, setAppSetting } from "../stores/app-settings-store";
 import { knownVariableNames } from "../stores/environment-store";
 import { renderWrappingField, wrappingFieldStyles } from "./wrapping-field";
 import { watch } from "../controllers/signal-watcher";
@@ -59,6 +59,7 @@ export class KeyValueTable extends LitElement {
     return html`
       <div class="bar">
         <span>${this.title}</span><span class="spacer"></span>
+        ${isBulk ? undefined : this.renderDescriptionToggle()}
         <button
           class="link"
           title=${`One key:value per line; // disables a line (${shortcutLabel("Mod+/")} toggles it)`}
@@ -71,12 +72,34 @@ export class KeyValueTable extends LitElement {
     `;
   }
 
+  /** Shows or hides the Description column, in every table (Settings keeps the choice). */
+  private renderDescriptionToggle(): TemplateResult {
+    const isShown = appSettings.get().showDescriptions;
+    const toggle = (): void => {
+      setAppSetting("showDescriptions", !isShown);
+    };
+    return html`<button
+      class="link"
+      aria-pressed=${String(isShown)}
+      title=${isShown ? "Hide the Description column" : "Show the Description column"}
+      @click=${toggle}
+    >
+      ${isShown ? "Hide description" : "Show Description"}
+    </button>`;
+  }
+
   private renderTable(): TemplateResult {
     const blank: KeyValue = { key: "", value: "", isEnabled: true };
-    return html`<div class="table" role="table" aria-label=${this.title || "Rows"}>
+    const showsDescription = appSettings.get().showDescriptions;
+    return html`<div
+      class="table ${showsDescription ? "" : "is-without-description"}"
+      role="table"
+      aria-label=${this.title || "Rows"}
+    >
       <div class="row head" role="row">
         <span role="columnheader"></span><span role="columnheader">${this.keyLabel}</span>
-        <span role="columnheader">Value</span><span role="columnheader">Description</span><span></span>
+        <span role="columnheader">Value</span
+        >${showsDescription ? html`<span role="columnheader">Description</span>` : undefined}<span></span>
       </div>
       ${[...this.rows, blank].map((row, index) => this.renderRow(row, index))}
     </div>`;
@@ -95,7 +118,7 @@ export class KeyValueTable extends LitElement {
         >${isBlank ? undefined : html`<input type="checkbox" aria-label="Enabled" .checked=${row.isEnabled} @change=${toggle} />`}</span
       >
       ${this.renderCell(row, index, "key")} ${this.renderCell(row, index, "value")}
-      ${this.renderCell(row, index, "description")}
+      ${appSettings.get().showDescriptions ? this.renderCell(row, index, "description") : undefined}
       <span class="actions">
         ${
           isBlank

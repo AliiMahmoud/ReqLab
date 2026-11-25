@@ -1,4 +1,5 @@
-import { css, html, LitElement, type TemplateResult } from "lit";
+import { html, LitElement, type TemplateResult } from "lit";
+import { requestAreaStyles } from "./request-area-styles";
 import { safeStyle } from "../../directives/safe-style";
 import { formStyles } from "../../components/shared-styles";
 import { watch } from "../../controllers/signal-watcher";
@@ -18,7 +19,15 @@ import "./empty-request-area";
 import "./request-editor";
 import "./request-title";
 import "./split-divider";
-import { isResponseCollapsed, requestShare } from "../../stores/layout-store";
+import {
+  isResponseCollapsed,
+  isResponseFullScreen,
+  isResponseHidden,
+  requestShare,
+} from "../../stores/layout-store";
+import { appSettings, type AppSettings } from "../../stores/app-settings-store";
+import { renderResponseToggle, responseToggleStyles } from "../responses/response-toggle";
+import { ResponseDockController } from "./response-dock";
 import { hasUnsavedChanges, type RequestTab } from "../../stores/request-tab";
 import "./request-tabs-bar";
 import "../containers/container-settings-view";
@@ -30,49 +39,26 @@ import { mainView } from "../../stores/view-store";
 
 /** The main column: open tabs, then the URL bar and the request / response split. */
 export class RequestArea extends LitElement {
-  static override styles = [
-    formStyles,
-    css`
-      :host {
-        flex: 1;
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-      }
-      /* Request on top, response below, a draggable divider between them. */
-      .split {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        border-top: 1px solid var(--color-border);
-        min-height: 0;
-      }
-      request-editor {
-        flex: none;
-        min-height: 80px;
-        overflow: auto;
-      }
-      response-panel {
-        flex: 1;
-        min-height: 41px;
-      }
-      .split.is-collapsed request-editor {
-        flex: 1;
-      }
-      .split.is-collapsed response-panel {
-        flex: none;
-      }
-    `,
-  ];
+  static override styles = [formStyles, responseToggleStyles, requestAreaStyles];
   static override properties = { workspaceId: { attribute: false } };
 
   declare workspaceId: string;
+  readonly #dock = new ResponseDockController(this);
   #lastNamesKey = "";
 
   constructor() {
     super();
-    watch(this, tabs, activeTabId, activeEnvironmentId, requestShare, isResponseCollapsed);
+    watch(
+      this,
+      tabs,
+      activeTabId,
+      activeEnvironmentId,
+      requestShare,
+      isResponseCollapsed,
+      isResponseHidden,
+      isResponseFullScreen,
+      appSettings,
+    );
   }
 
   override connectedCallback(): void {
@@ -106,20 +92,29 @@ export class RequestArea extends LitElement {
         .tab=${tab}
       ></container-settings-view>`;
     return html`<request-title .tab=${tab} .workspaceId=${this.workspaceId}></request-title>
-      <url-bar .tab=${tab}></url-bar> ${this.renderSplit(tab)}`;
+      <url-bar .tab=${tab}></url-bar> ${this.renderSplit(tab)}
+      <div class="request-footer">${renderResponseToggle()}</div>`;
   }
 
   private renderSplit(tab: RequestTab): TemplateResult {
+    // Closed with the response's ×: the request alone fills the area.
+    if (isResponseHidden.get()) {
+      return html`<div class="split is-collapsed">
+        <request-editor .tab=${tab} .workspaceId=${this.workspaceId}></request-editor>
+      </div>`;
+    }
     const isCollapsed = isResponseCollapsed.get();
-    const height = isCollapsed ? {} : { height: `${String(requestShare.get() * 100)}%` };
-    return html`<div class="split ${isCollapsed ? "is-collapsed" : ""}">
-      <request-editor
-        .tab=${tab}
-        .workspaceId=${this.workspaceId}
-        style=${safeStyle(height)}
-      ></request-editor>
-      <split-divider></split-divider>
+    const position = appSettings.get().responsePosition;
+    const size = isCollapsed ? {} : requestSize(position);
+    const docking = this.#dock.isDragging ? "is-docking" : "";
+    const fullScreen = isResponseFullScreen.get() ? "is-full-screen" : "";
+    return html`<div
+      class="split is-${position} ${isCollapsed ? "is-collapsed" : ""} ${docking} ${fullScreen}"
+    >
+      <request-editor .tab=${tab} .workspaceId=${this.workspaceId} style=${safeStyle(size)}></request-editor>
+      <split-divider .position=${position}></split-divider>
       <response-panel .tab=${tab}></response-panel>
+      ${this.#dock.renderPreview()}
     </div>`;
   }
 
@@ -186,6 +181,12 @@ export class RequestArea extends LitElement {
     }
     void saveTab(this.workspaceId, tab.id).then(() => loadCollectionTree(this.workspaceId));
   };
+}
+
+/** The request's share of the split: of the height with the response below, of the width beside it. */
+function requestSize(position: AppSettings["responsePosition"]): Record<string, string> {
+  const share = `${String(requestShare.get() * 100)}%`;
+  return position === "below" ? { height: share } : { width: share };
 }
 
 customElements.define("request-area", RequestArea);

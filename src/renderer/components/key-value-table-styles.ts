@@ -39,6 +39,10 @@ export const keyValueTableStyles = css`
     grid-template-columns: 34px minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr) 34px;
     border-bottom: 1px solid var(--color-border);
   }
+  /* Description hidden (the default): Key and Value share its room. */
+  .is-without-description .row {
+    grid-template-columns: 34px minmax(0, 1fr) minmax(0, 1.6fr) 34px;
+  }
   .row:last-child {
     border-bottom: none;
   }

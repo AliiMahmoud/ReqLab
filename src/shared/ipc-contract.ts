@@ -159,6 +159,31 @@ export const ipcContract = {
   "http:send": { input: SendRequestInput, output: ResponseView },
   "http:cancel": { input: CancelRequestInput, output: Done },
   "http:copy-log": { input: NetworkLogInput, output: Done },
+  /** The response body as received: copied, or saved to a file the user picks. */
+  "http:copy-body": {
+    input: NetworkLogInput,
+    output: z.object({ result: z.enum(["copied", "copied-secret", "binary", "gone"]) }),
+  },
+  /** For a response main no longer keeps (e.g. restored at launch): what the response view shows. */
+  "http:copy-shown-body": { input: z.object({ text: z.string().max(30_000_000) }), output: Done },
+  "http:save-shown-body": {
+    input: z.object({
+      requestName: z.string().max(500),
+      contentType: z.string().max(500),
+      text: z.string().max(30_000_000).optional(),
+      base64: z
+        .string()
+        .max(40_000_000)
+        .regex(/^[A-Za-z0-9+/]*={0,2}$/)
+        .optional(),
+    }),
+    output: z.object({ result: z.enum(["saved", "cancelled"]) }),
+  },
+  "http:save-body": {
+    /** The tab's name, suggested as the file's name. */
+    input: NetworkLogInput.extend({ requestName: z.string().max(500) }),
+    output: z.object({ result: z.enum(["saved", "cancelled", "gone"]), containsSecret: z.boolean() }),
+  },
   "http:get-log": { input: NetworkLogInput, output: NetworkLogView.nullable() },
   "http:copy-as-curl": { input: SendRequestInput, output: z.object({ containsSecrets: z.boolean() }) },
 

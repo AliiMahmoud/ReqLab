@@ -59,6 +59,16 @@ export const saveFileIcon = (): TemplateResult =>
     15,
   );
 /** A window with its left column marked: show / hide the left panel. */
+/** A window with its response panel at the bottom, right or left (Settings › Response position). */
+export const responsePanelIcon = (side: "below" | "right" | "left"): TemplateResult => {
+  const divider = { below: "M4 14h16", right: "M15 5v14", left: "M9 5v14" }[side];
+  return icon(svg`<rect x="4" y="5" width="16" height="14" rx="2"></rect><path d=${divider}></path>`, 16);
+};
+/** Four corners pointing out / in: full screen, and back. */
+export const fullScreenIcon = (): TemplateResult =>
+  icon(svg`<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path>`, 14);
+export const exitFullScreenIcon = (): TemplateResult =>
+  icon(svg`<path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"></path>`, 14);
 export const sidebarIcon = (): TemplateResult =>
   icon(svg`<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"></rect><path d="M9.5 4.5v15"></path>`, 16);
 /** A terminal prompt ">_": the scripts' console (Tests tab). */
@@ -75,6 +85,8 @@ export const eyeIcon = (): TemplateResult =>
     svg`<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle>`,
     13,
   );
+export const downloadIcon = (): TemplateResult =>
+  icon(svg`<path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path>`, 14);
 export const copyIcon = (): TemplateResult =>
   icon(
     svg`<rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path>`,
