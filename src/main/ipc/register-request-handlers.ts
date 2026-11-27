@@ -11,6 +11,7 @@ export function registerRequestHandlers(router: IpcRouter, { data, clipboard }: 
     await clipboard.copyText(itemId);
     return true as const;
   });
+  router.handle("requests:header-names", ({ workspaceId }) => data.requests(workspaceId).headerNames());
   router.handle("requests:save", ({ workspaceId, itemId, definition }) => {
     data.requests(workspaceId).save(itemId, definition);
     return true as const;

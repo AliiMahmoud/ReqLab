@@ -1,9 +1,11 @@
 import type { KeyValue } from "@shared/models/request";
+import { decodeQueryPart, encodeQueryPart } from "@shared/query-encoding";
 
 /**
  * Keeps the URL's query string and the Params table in step, both ways.
- * Text is kept raw (not decoded) so {{variables}} survive; disabled params live only in the table,
- * and descriptions follow their key.
+ * Params are stored as they are in the URL (encoded), so the URL, cURL and exports agree; only the
+ * table shows them decoded (paramsForTable / paramsFromTable). Disabled params live only in the
+ * table, and descriptions follow their key.
  */
 export function paramsFromUrl(url: string, previous: readonly KeyValue[]): KeyValue[] {
   const queryStart = url.indexOf("?");
@@ -41,6 +43,32 @@ export function urlWithParams(url: string, params: readonly KeyValue[]): string 
     .map((param) => (param.value === "" ? param.key : `${param.key}=${param.value}`))
     .join("&");
   return `${base}${query === "" ? "" : `?${query}`}${hash === undefined ? "" : `#${hash}`}`;
+}
+
+/** The params as the table shows them: keys and values decoded ("hello%20world" → "hello world"). */
+export function paramsForTable(params: readonly KeyValue[]): KeyValue[] {
+  return params.map((param) => ({
+    ...param,
+    key: decodeQueryPart(param.key),
+    value: decodeQueryPart(param.value),
+  }));
+}
+
+/**
+ * The table's rows back as stored: a row whose key or value the user changed is encoded for the
+ * URL; any other keeps its exact text (so editing one param never changes how another is written).
+ */
+export function paramsFromTable(rows: readonly KeyValue[], stored: readonly KeyValue[]): KeyValue[] {
+  return rows.map((row, index) => {
+    const before = stored[index];
+    const isTextUnchanged =
+      before !== undefined &&
+      decodeQueryPart(before.key) === row.key &&
+      decodeQueryPart(before.value) === row.value;
+    return isTextUnchanged
+      ? { ...row, key: before.key, value: before.value }
+      : { ...row, key: encodeQueryPart(row.key), value: encodeQueryPart(row.value) };
+  });
 }
 
 function parsePair(pair: string): KeyValue {

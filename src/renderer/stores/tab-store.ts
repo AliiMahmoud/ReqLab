@@ -12,6 +12,7 @@ import { createTab, hasUnsavedChanges, type ContainerSection, type RequestTab } 
 import { fromPersistedTab, toPersistedTab } from "./tab-snapshot";
 import { signal } from "./signal";
 import { forgetDraftHistory, recordDraftEdit } from "./draft-history";
+import { loadHeaderNames } from "./header-names-store";
 
 export const tabs = signal<RequestTab[]>([]);
 export const activeTabId = signal<string | undefined>(undefined);
@@ -145,7 +146,10 @@ export async function saveTab(workspaceId: string, tabId: string): Promise<void>
   const tab = findTab(tabId);
   if (tab === undefined || tab.itemId === null) return;
   const saved = await callApi(api.saveRequest({ workspaceId, itemId: tab.itemId, definition: tab.draft }));
-  if (saved !== undefined) updateTab(tabId, { savedJson: JSON.stringify(tab.draft) });
+  if (saved === undefined) return;
+  updateTab(tabId, { savedJson: JSON.stringify(tab.draft) });
+  // A header name used for the first time is suggested from now on.
+  void loadHeaderNames(workspaceId);
 }
 
 /** Creates a request item from a draft tab, saves it, and links the tab to it. */

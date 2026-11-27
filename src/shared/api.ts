@@ -55,6 +55,7 @@ export const apiMethods = {
   getRequest: "requests:get",
   copyRequestId: "requests:copy-id",
   saveRequest: "requests:save",
+  listHeaderNames: "requests:header-names",
   listEnvironments: "environments:list",
   createEnvironment: "environments:create",
   renameEnvironment: "environments:rename",

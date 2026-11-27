@@ -14,6 +14,8 @@ import {
 } from "./variable-highlight";
 import { appSettings, setAppSetting } from "../stores/app-settings-store";
 import { knownVariableNames } from "../stores/environment-store";
+import { headerNames } from "../stores/header-names-store";
+import { suggestionList } from "./suggestion-list";
 import { renderWrappingField, wrappingFieldStyles } from "./wrapping-field";
 import { watch } from "../controllers/signal-watcher";
 
@@ -31,6 +33,7 @@ export class KeyValueTable extends LitElement {
     title: { attribute: false },
     onChange: { attribute: false },
     allowsNewLines: { attribute: false },
+    suggestsHeaderNames: { attribute: false },
     bulkText: { state: true },
   };
 
@@ -40,6 +43,8 @@ export class KeyValueTable extends LitElement {
   declare onChange: (rows: KeyValue[]) => void;
   /** Body form tables: values may span lines when Settings › New lines in form values is on. */
   declare allowsNewLines: boolean;
+  /** The headers table: typing a name suggests known HTTP headers and saved requests' names. */
+  declare suggestsHeaderNames: boolean;
   /** The bulk-edit text as typed; undefined while editing as a table. */
   declare bulkText: string | undefined;
 
@@ -50,8 +55,9 @@ export class KeyValueTable extends LitElement {
     this.title = "";
     this.onChange = () => undefined;
     this.allowsNewLines = false;
+    this.suggestsHeaderNames = false;
     this.bulkText = undefined;
-    watch(this, knownVariableNames, appSettings);
+    watch(this, knownVariableNames, appSettings, headerNames);
   }
 
   override render(): TemplateResult {
@@ -139,8 +145,10 @@ export class KeyValueTable extends LitElement {
   private renderCell(row: KeyValue, index: number, field: Field): TemplateResult {
     const labels: Record<Field, string> = { key: this.keyLabel, value: "Value", description: "Description" };
     const update = (event: Event): void => {
-      this.change(index, { [field]: (event.target as HTMLInputElement).value });
+      const input = event.target as HTMLInputElement;
+      this.change(index, { [field]: input.value });
       syncVariableOverlay(event);
+      if (field === "key" && this.suggestsHeaderNames) this.suggestNames(input, index);
     };
     const value = row[field] ?? "";
     const highlights = field !== "description";
@@ -151,15 +159,40 @@ export class KeyValueTable extends LitElement {
         data-variables
         aria-label=${labels[field]}
         placeholder=${index === this.rows.length ? labels[field] : ""}
+        autocomplete="off"
         spellcheck="false"
         .value=${value}
         @input=${update}
+        @keydown=${this.onNameCell(field, this.handleSuggestionKeys)}
+        @blur=${this.onNameCell(field, this.hideSuggestions)}
         @scroll=${syncVariableOverlay}
         @keyup=${syncVariableOverlay}
         @select=${syncVariableOverlay}
       />${highlights ? variableOverlay(value) : undefined}</span
     >`;
   }
+
+  /** Header names matching what is typed, under the name cell; a pick fills the cell. */
+  private suggestNames(input: HTMLInputElement, index: number): void {
+    const onPick = (name: string): void => {
+      input.value = name;
+      this.change(index, { key: name });
+    };
+    suggestionList().showFor(input, { typed: input.value, choices: headerNames.get(), onPick });
+  }
+
+  /** A handler for the name cells only (where header names are suggested). */
+  private onNameCell<T>(field: Field, handler: T): T | undefined {
+    return field === "key" ? handler : undefined;
+  }
+
+  private readonly handleSuggestionKeys = (event: KeyboardEvent): void => {
+    if (suggestionList().handleKey(event.key)) event.preventDefault();
+  };
+
+  private readonly hideSuggestions = (): void => {
+    suggestionList().hide();
+  };
 
   /** Values wrap and grow instead of scrolling sideways; line breaks only where they are allowed. */
   private renderValueCell(value: string, index: number): TemplateResult {

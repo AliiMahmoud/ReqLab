@@ -4,7 +4,7 @@ import type { KeyValue } from "@shared/models/request";
 import "../../components/key-value-table";
 import { formStyles } from "../../components/shared-styles";
 import { findTreeItem } from "../../stores/collection-store";
-import { urlWithParams } from "../../stores/query-sync";
+import { paramsForTable, paramsFromTable, urlWithParams } from "../../stores/query-sync";
 import type { EditorSection, RequestTab } from "../../stores/request-tab";
 import { updateDraft, updateTab } from "../../stores/tab-store";
 import "../../components/auth-editor";
@@ -131,7 +131,7 @@ export class RequestEditor extends LitElement {
       updateDraft(id, { pathVariables });
     };
     return html`<key-value-table
-        .rows=${draft.params}
+        .rows=${paramsForTable(draft.params)}
         .title=${"Query Params"}
         .onChange=${changeParams}
       ></key-value-table>
@@ -148,7 +148,9 @@ export class RequestEditor extends LitElement {
 
   private renderEditableSection(section: "params" | "headers" | "body"): TemplateResult {
     const { id, draft } = this.tab;
-    const changeParams = (params: KeyValue[]): void => {
+    // The table shows params decoded; they are stored, and written into the URL, encoded.
+    const changeParams = (rows: KeyValue[]): void => {
+      const params = paramsFromTable(rows, draft.params);
       updateDraft(id, { params, url: urlWithParams(draft.url, params) });
     };
     const changeHeaders = (headers: KeyValue[]): void => {
@@ -162,6 +164,7 @@ export class RequestEditor extends LitElement {
       return html`<key-value-table
         .rows=${draft.headers}
         .title=${"Headers"}
+        .suggestsHeaderNames=${true}
         .onChange=${changeHeaders}
       ></key-value-table>`;
     }

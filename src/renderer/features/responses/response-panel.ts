@@ -63,12 +63,19 @@ export class ResponsePanel extends LitElement {
 
   override render(): TemplateResult {
     const { response, error, sendingRequestId } = this.tab;
-    if (sendingRequestId !== undefined) return this.renderSending();
+    const isSending = sendingRequestId !== undefined;
+    // A resend keeps the last response on screen under the moving bar, so the view is not rebuilt:
+    // an identical new body changes nothing (folds and scrolling stay), a different one replaces it.
+    if (isSending && response === undefined) return this.renderSending();
     if (error !== undefined) return this.renderMessage(error, true);
     if (response === undefined) return this.renderMessage("Send the request to see the response here.");
-    if (isResponseCollapsed.get()) return this.renderStatusLine(response);
+    const loading = isSending
+      ? html`<div class="loading-bar" role="progressbar" aria-label="Sending request"></div>`
+      : undefined;
+    if (isResponseCollapsed.get()) return html`${loading}${this.renderStatusLine(response)}`;
     return html`
-      ${this.renderStatusLine(response)} ${this.renderWarnings(response)} ${this.renderSection(response)}
+      ${loading} ${this.renderStatusLine(response)} ${this.renderWarnings(response)}
+      ${this.renderSection(response)}
       <div class="footer">
         <span>DNS ${formatMilliseconds(response.timings.dns)}</span><span>·</span>
         <span>Connect ${formatMilliseconds(response.timings.connect)}</span><span>·</span>

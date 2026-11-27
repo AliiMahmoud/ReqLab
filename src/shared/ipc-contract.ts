@@ -143,6 +143,8 @@ export const ipcContract = {
   "requests:get": { input: RequestItemInput, output: RequestDefinition },
   "requests:copy-id": { input: RequestItemInput, output: Done },
   "requests:save": { input: SaveRequestInput, output: Done },
+  /** Header names already used by the workspace's saved requests (suggested while typing one). */
+  "requests:header-names": { input: WorkspaceScoped, output: z.array(z.string().max(1_000)).max(500) },
 
   "environments:list": { input: WorkspaceScoped, output: z.array(Environment) },
   "environments:create": { input: CreateEnvironmentInput, output: Environment },

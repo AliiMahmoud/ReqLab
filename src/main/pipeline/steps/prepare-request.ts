@@ -1,15 +1,11 @@
 import type { RequestDefinition } from "@shared/models/request";
 import { RequestFailed } from "../../errors";
 import { encodeBody } from "../../http/body-encoders/body-encoder-registry";
+import { encodeUrlForSending } from "../../http/encode-url";
+import { DEFAULT_HEADERS } from "../../http/default-headers";
 import { fillPathVariables } from "../../http/fill-path-variables";
 import { findHeader, type HeaderList, type PreparedRequest } from "../../http/http-types";
 import { requireValue, type PipelineStep } from "../request-context";
-
-const DEFAULT_HEADERS: HeaderList = [
-  ["User-Agent", "ReqLab/0.1"],
-  ["Accept", "*/*"],
-  ["Accept-Encoding", "gzip, deflate, br"],
-];
 
 /** Turns the resolved definition into bytes and headers ready for the network. */
 export const prepareRequest: PipelineStep = (context) => {
@@ -48,7 +44,8 @@ function parseHttpUrl(text: string): URL {
   const withScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(trimmed) ? trimmed : `http://${trimmed}`;
   let url: URL;
   try {
-    url = new URL(withScheme);
+    // Encoded for the wire only (and Copy as cURL, built from this); the editor shows it as typed.
+    url = new URL(encodeUrlForSending(withScheme));
   } catch {
     throw new RequestFailed("The URL is not valid. Check for unresolved {{variables}}.");
   }

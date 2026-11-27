@@ -3,6 +3,7 @@ import { api } from "../api";
 import { callApi } from "./notice-store";
 import { readCollapsed, saveCollapsed } from "./collapsed-store";
 import { signal } from "./signal";
+import { loadHeaderNames } from "./header-names-store";
 
 export const collectionTree = signal<CollectionTree>({ collections: [], items: [] });
 /** Folders and collections the user collapsed (remembered per workspace). New ones start expanded. */
@@ -17,6 +18,7 @@ export async function loadCollectionTree(workspaceId: string): Promise<void> {
     collapsedIds.set(readCollapsed(workspaceId));
   }
   collectionTree.set(tree);
+  void loadHeaderNames(workspaceId);
 }
 
 export async function createCollection(workspaceId: string, name: string): Promise<Collection | undefined> {
